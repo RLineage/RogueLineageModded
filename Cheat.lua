@@ -14,6 +14,12 @@ local range = 1000
 local list = nil
 local gui = nil
 
+local nofall = false
+
+local _character = player.Character or player.CharacterAdded:Wait()
+
+local fallRemote = _character:WaitForChild("CharacterHandler"):WaitForChild("Remotes"):WaitForChild("ApplyFallDamage")
+
 local trinketList = {
 	["rbxassetid://5196551436"] = "Amulet",
 	["rbxassetid://5196577540"] = "Old Amulet",
@@ -86,7 +92,7 @@ function generateText(properties)
 	return text
 end
 
-local function createButton(name, text, mouse1click)
+local function createButton(name, text, mouse1click, toggle)
 	if (not list) then error("No List existant.") return end
 	
 	local button = Instance.new("TextButton", list)
@@ -116,7 +122,19 @@ local function createButton(name, text, mouse1click)
 	overlay.AnchorPoint = Vector2.new(0.5, 0.5)
 	overlay.ZIndex = 1
 	
-	button.MouseButton1Click:Connect(mouse1click)
+	if (toggle) then
+		button.Active = false
+		
+		button.MouseButton1Click:Connect(function()
+			button.Active = not button.Active
+			
+			mouse1click(button.Active)
+			
+			button.BackgroundColor3 = (button.Active) and Color3.fromRGB(159, 255, 142) or Color3.fromRGB(215, 203, 191)
+		end)
+	else
+		button.MouseButton1Click:Connect(mouse1click)
+	end
 end
 
 local espEnabled = false
@@ -193,6 +211,10 @@ local function createGui()
 			v.Enabled = playerEspEnabled
 		end
 	end)
+	
+	createButton(generateUUID(), "No Fall", function()
+		nofall = not nofall
+	end, true)
 end
 
 -- Trinket Trinket <font color="rgb(1,0.19607843458652496,0.19607843458652496)">ESPTrinket Trinket <font color="rgb(1,0.19607843458652496,0.19607843458652496)">ESP
@@ -445,7 +467,16 @@ connect = game:GetService("RunService").Heartbeat:Connect(function()
 		end
 	end
 	
+	if (nofall) then
+		fallRemote.Parent = _character
+	else
+		fallRemote.Parent = _character.CharacterHandler.Remotes
+	end
+	
 	if (playerGui:HasTag("GamingGaming")) then
+		for _, v in pairs(playerEspTable) do
+			v:Destroy()
+		end
 		for _, v in pairs(espTable) do
 			v:Destroy()
 		end
