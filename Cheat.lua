@@ -227,6 +227,7 @@ function playerEsp()
 		end
 		
 		local char = v.Character or v.CharacterAdded:Wait()
+		if (not char:FindFirstChild("HumanoidRootPart")) then continue end
 		
 		local billboard = Instance.new("BillboardGui", playerEspFolder)
 		billboard.Adornee = char.HumanoidRootPart
@@ -246,11 +247,15 @@ function playerEsp()
 		v.Backpack.ChildAdded:Connect(function()
 			if checkIllu(v) then
 				text.TextColor3 = Color3.fromRGB(30, 206, 255)
+			else
+				text.TextColor3 = Color3.fromRGB(255,255,255)
 			end
 		end)
 		char.ChildAdded:Connect(function()
 			if checkIllu(v) then
 				text.TextColor3 = Color3.fromRGB(30, 206, 255)
+			else
+				text.TextColor3 = Color3.fromRGB(255,255,255)
 			end
 		end)
 		
