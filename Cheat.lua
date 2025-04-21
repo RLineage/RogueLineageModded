@@ -426,7 +426,7 @@ function esp()
 							text.Text = "Mysterious Artifact"
 							text.TextColor3 = Color3.fromRGB(98, 255, 0)
 						else
-							text.Text = "Azael Horn"
+							text.Text = "Phoenix Flower"
 							text.TextColor3 = Color3.fromRGB(255, 0, 4)
 						end
 					end
