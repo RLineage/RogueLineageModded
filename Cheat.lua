@@ -228,9 +228,9 @@ function playerEsp()
 
 	for _,v in pairs(game.Players:GetChildren()) do
 		if (player == v) then continue end
-		if (not player:FindFirstChild("Ingame")) then
+		--[[if (not player:FindFirstChild("Ingame")) then
 			continue
-		end
+		end]]
 		
 		local char = v.Character or v.CharacterAdded:Wait()
 		if (not char:FindFirstChild("HumanoidRootPart")) then continue end
