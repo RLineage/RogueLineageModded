@@ -318,6 +318,11 @@ function esp()
 			elseif (v.Color == Color3.fromRGB(248, 217, 109)) then
 				text.Text = "Scroom Key"
 				text.TextColor3 = Color3.fromRGB(248, 217, 109)
+			elseif (v.Color == Color3.fromRGB(211, 0, 0)) and (v:FindFirstChildOfClass("Attachment")) then
+				if (v:FindFirstChildOfClass("Attachment"):FindFirstChild("OrbParticle")) then
+					text.Text = "Idol of War"
+					text.TextColor3 = Color3.fromRGB(141, 255, 139)
+				end
 			end
 		elseif (v:IsA("MeshPart")) then
 			if (trinketList[v.MeshId]) then
