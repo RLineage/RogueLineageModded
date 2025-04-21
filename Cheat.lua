@@ -326,6 +326,8 @@ function esp()
 	for _,v in pairs(trinkets:GetChildren()) do
 		if (root.Position - v.Position).Magnitude >= range then continue end
 		
+		if (not v:FindFirstChild("ClickPart")) then continue end
+		
 		local billboard = Instance.new("BillboardGui", esptrinket)
 		billboard.Adornee = v.ClickPart
 		billboard.AlwaysOnTop = true
@@ -405,6 +407,9 @@ function esp()
 					if (v.Color == Color3.fromRGB(128, 187, 219)) then
 						text.Text = "Fairfrozen"
 						text.TextColor3 = Color3.fromRGB(128, 187, 219)
+					elseif (v.Color == Color3.fromRGB(143, 219, 122)) then
+						text.Text = "Nature Essence"
+						text.TextColor3 = Color3.fromRGB(143, 219, 122)
 					elseif (v.Color == Color3.fromRGB(248, 248, 248)) then
 						text.Text = "Opal"
 					end
