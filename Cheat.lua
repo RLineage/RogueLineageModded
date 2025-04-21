@@ -250,7 +250,7 @@ function playerEsp()
 		text.Position = UDim2.new(0,0,0,0)
 		text.BackgroundTransparency = 1
 		text.TextColor3 = Color3.fromRGB(255,255,255)
-		text.TextScaled = true
+		text.TextSize = 24
 
 		if checkIllu(v) then
 			text.TextColor3 = Color3.fromRGB(30, 206, 255)
@@ -298,7 +298,7 @@ function esp()
 		text.Position = UDim2.new(0,0,0,0)
 		text.BackgroundTransparency = 1
 		text.TextColor3 = Color3.fromRGB(255,255,255)
-		text.TextScaled = true
+		text.TextSize = 24
 		
 		if (v:IsA("UnionOperation")) then
 			if (v.Color == Color3.fromRGB(255,89,89)) and (v.Material == Enum.Material.Neon) then
