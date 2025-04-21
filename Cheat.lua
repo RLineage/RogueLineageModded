@@ -17,6 +17,25 @@ local gui = nil
 local nofall = false
 
 local _character = player.Character or player.CharacterAdded:Wait()
+for _, v in pairs(workspace:GetChildren()) do
+	if (v.Name == "NofallLeg") or (v:HasTag("GamingGaming")) then
+		v:Destroy()
+	end
+end
+
+local nofallleg = _character:FindFirstChild("Right Leg"):Clone()
+nofallleg.Parent = workspace
+nofallleg.Name = "NofallLeg"
+nofallleg.CanCollide = false
+nofallleg.Anchored = false
+nofallleg.Transparency =1 
+nofallleg.Size += Vector3.new(1,.4,1)
+
+local weld = Instance.new("Weld", nofallleg)
+weld.Part0 = _character:FindFirstChild("HumanoidRootPart")
+weld.Part1 = nofallleg
+weld.C0 = CFrame.new(0, -2, 0)
+weld.C1	= CFrame.new(0, 0, 0)
 
 local fallRemote = _character:WaitForChild("CharacterHandler"):WaitForChild("Remotes"):WaitForChild("ApplyFallDamage")
 
@@ -466,12 +485,8 @@ connect = game:GetService("RunService").Heartbeat:Connect(function()
 			lastupdated = tick()
 		end
 	end
-	
-	if (nofall) then
-		fallRemote.Parent = _character
-	else
-		fallRemote.Parent = _character.CharacterHandler.Remotes
-	end
+
+	nofallleg.CanCollide = nofall
 	
 	if (playerGui:HasTag("GamingGaming")) then
 		for _, v in pairs(playerEspTable) do
@@ -480,6 +495,8 @@ connect = game:GetService("RunService").Heartbeat:Connect(function()
 		for _, v in pairs(espTable) do
 			v:Destroy()
 		end
+		nofallleg:Destroy()
+		weld:Destroy()
 		
 		for _, v in pairs(playerGui:GetChildren()) do
 			if (v:HasTag("GamingGaming")) then
