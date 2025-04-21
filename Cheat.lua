@@ -197,9 +197,6 @@ end
 
 -- Trinket Trinket <font color="rgb(1,0.19607843458652496,0.19607843458652496)">ESPTrinket Trinket <font color="rgb(1,0.19607843458652496,0.19607843458652496)">ESP
 
-local playerEspFolder = Instance.new("Folder", playerGui)
-playerEspFolder:AddTag("GamingGaming")
-
 local function checkIllu(plr)
 	local illu = false
 
@@ -216,8 +213,17 @@ end
 function playerEsp()
 	local player = game.Players.LocalPlayer
 
-	for _, v in pairs(playerEspTable) do
+	local playerEspFolder = playerGui:FindFirstChild("PlayerEsp")
+	if (not playerEspFolder) then
+		playerEspFolder = Instance.new("Folder", playerGui)
+		playerEspFolder:AddTag("GamingGaming")
+		playerEspFolder.Name = "PlayerEsp"
+	end
+	
+	for i, v in pairs(playerEspTable) do
 		v:Destroy()
+		
+		playerEspTable[i] = nil
 	end
 
 	for _,v in pairs(game.Players:GetChildren()) do
@@ -228,6 +234,8 @@ function playerEsp()
 		
 		local char = v.Character or v.CharacterAdded:Wait()
 		if (not char:FindFirstChild("HumanoidRootPart")) then continue end
+		
+		print(v.Name)
 		
 		local billboard = Instance.new("BillboardGui", playerEspFolder)
 		billboard.Adornee = char.HumanoidRootPart
@@ -244,20 +252,11 @@ function playerEsp()
 		text.TextColor3 = Color3.fromRGB(255,255,255)
 		text.TextScaled = true
 
-		v.Backpack.ChildAdded:Connect(function()
-			if checkIllu(v) then
-				text.TextColor3 = Color3.fromRGB(30, 206, 255)
-			else
-				text.TextColor3 = Color3.fromRGB(255,255,255)
-			end
-		end)
-		char.ChildAdded:Connect(function()
-			if checkIllu(v) then
-				text.TextColor3 = Color3.fromRGB(30, 206, 255)
-			else
-				text.TextColor3 = Color3.fromRGB(255,255,255)
-			end
-		end)
+		if checkIllu(v) then
+			text.TextColor3 = Color3.fromRGB(30, 206, 255)
+		else
+			text.TextColor3 = Color3.fromRGB(255,255,255)
+		end
 		
 		table.insert(playerEspTable, billboard)
 	end
@@ -426,7 +425,7 @@ local lastupdated = tick()
 local connect:RBXScriptConnection = nil
 connect = game:GetService("RunService").Heartbeat:Connect(function()
 	if (playerEspEnabled) then
-		if (tick() - lastpespupdated) > 1 then
+		if (tick() - lastpespupdated) > 3 then
 			playerEsp()
 
 			lastpespupdated = tick()
@@ -434,7 +433,7 @@ connect = game:GetService("RunService").Heartbeat:Connect(function()
 	end
 	
 	if (espEnabled) then
-		if (tick() - lastupdated) > 1 then
+		if (tick() - lastupdated) > 3 then
 			esp()
 
 			lastupdated = tick()
