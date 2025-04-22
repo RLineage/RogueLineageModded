@@ -23,6 +23,7 @@ local exploits = {
 	PlayerEsp = false,
 	NoFall = false,
 	AutoPickup = false,
+	Configurations = false,
 }
 
 local configurations = {
@@ -58,23 +59,23 @@ local configurations = {
 			SemiArtifact = {
 				Show = true,
 				Color = Color3.fromRGB(255, 140, 0),
-				Range = 1000
+				Range = 10000
 			},
 			Artifact = {
 				Show = true,
 				Color = Color3.fromRGB(255, 0, 0),
-				Range = 1250
+				Range = 10000
 			},
 			Unknown = {
 				Show = true,
 				Color = Color3.fromRGB(225, 0, 255),
-				Range = 1250
+				Range = 10000
 			},
 			Specifics = {
 				["Rift Gem"] = {
 					Show = true,
 					Color = Color3.fromRGB(255, 0, 255),
-					Range = 1250
+					Range = 10000
 				},
 			},
 		},
@@ -98,6 +99,7 @@ local configurations = {
 
 			["Idol of War"] = "Event",
 			["Candy"] = "Event",
+			["Ornament"] = "Event",
 
 			["Phoenix Down"] = "SemiArtifact",
 			["Phoenix Flower"] = "SemiArtifact",
@@ -114,10 +116,14 @@ local configurations = {
 			["Lannis' Amulet"] = "Artifact",
 			["Fairfrozen"] = "Artifact",
 			["Nature Essence"] = "Artifact",
+			["Harpy Friend"] = "Artifact",
+			["Phoenix Feather"] = "Artifact",
+			["Azael Horns"] = "Artifact",
+			["Solan Key"] = "Artifact",
 
 			["Unknown"] = "Unknown"
 		},
-		MaxRange = 1250,
+		MaxRange = 10000,
 		LastUpdated = tick(),
 		Table = {},
 	},
@@ -129,7 +135,9 @@ local configurations = {
 		NoFallLeg = character:FindFirstChild("Right Leg"):Clone()	
 	},
 	AutoPickup = {
-		CanAutoPickup = true	
+		CanAutoPickup = true,
+		Percent = 0.9,
+		LastUpdated = tick()
 	},
 }
 
@@ -177,7 +185,7 @@ function generateUUID()
 	return uuid
 end
 
-local function createButton(name, text, mouse1click, toggle)
+local function createButton(name, text, mouse1click, toggle):TextButton
 	if (not list) then error("No List existant.") return end
 	
 	local button = Instance.new("TextButton", list)
@@ -220,6 +228,8 @@ local function createButton(name, text, mouse1click, toggle)
 	else
 		button.MouseButton1Click:Connect(mouse1click)
 	end
+	
+	return button	
 end
 
 local function createGui()
@@ -243,7 +253,7 @@ local function createGui()
 	local frame = Instance.new("Frame", screenGui)
 	frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 	frame.BackgroundTransparency = 0.8
-	frame.Position = UDim2.new(0.1, 0, 0.1, 0)
+	frame.Position = UDim2.new(0.6, 0, 0.1, 0)
 	frame.Size = UDim2.new(0, 250, 0, 250)
 	frame.Name = generateUUID().."Frame"
 	
@@ -263,19 +273,43 @@ local function createGui()
 	
 	local boundFrame = Instance.new("Frame", overlay)
 	boundFrame.Name = "BoundFrame"
-	boundFrame.Position = UDim2.new(0.05, 0, 0.05, 0)
-	boundFrame.Size = UDim2.new(0.9, 0, 0.9, 0)
+	boundFrame.Position = UDim2.new(0, 10, 0, 10)
+	boundFrame.Size = UDim2.new(1, -20, 1, -20)
 	boundFrame.BackgroundTransparency = 1
+
+	local title = Instance.new("TextLabel", boundFrame)
+	title.Name = "Title"
+	title.Text = "ROGUE CHEAT"
+	title.BackgroundTransparency = 1
+	title.Size = UDim2.new(1, 0, .078,  0)
+	title.TextTransparency = 0
+	title.TextStrokeTransparency = .8
+	title.TextSize = 13
+	title.RichText = true
+	title.FontFace = Font.new("rbxasset://fonts/families/Balthazar.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+	title.TextWrapped = false
+	title.TextColor3 = Color3.fromRGB(255, 232, 163)
 	
-	list = boundFrame
+	local buttonsFrame = Instance.new("Frame", boundFrame)
+	buttonsFrame.Name = "ButtonsFrame"
+	buttonsFrame.Position = UDim2.new(.047,  0, .125, 0)
+	buttonsFrame.Size = UDim2.new(.9, 0, .875, 0)
+	buttonsFrame.BackgroundTransparency = 1
 	
-	local uiListLayout = Instance.new("UIListLayout", boundFrame)
-	uiListLayout.Padding = UDim.new(0.05, 0)
+	list = buttonsFrame
+	
+	local uiListLayout = Instance.new("UIListLayout", list)
+	uiListLayout.Padding = UDim.new(0.1, 0)
 	uiListLayout.FillDirection = Enum.FillDirection.Horizontal
+	uiListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	uiListLayout.Wraps =  true
+	uiListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+	uiListLayout.HorizontalFlex = Enum.UIFlexAlignment.SpaceBetween
+	uiListLayout.VerticalAlignment = Enum.VerticalAlignment.Top
 	
 	gui = screenGui
 	
-	createButton(generateUUID(), "Trinket ESP", function()
+	local tEsp = createButton(generateUUID(), "Trinket ESP", function()
 		exploits.TrinketEsp = not exploits.TrinketEsp
 		
 		for _, v in pairs(configurations.TrinketEsp.Table) do
@@ -283,7 +317,7 @@ local function createGui()
 		end
 	end, true) -- Trinket <font color="rgb(255,50,50">ESP</font>
 
-	createButton(generateUUID(), "Player ESP", function()
+	local pEsp = createButton(generateUUID(), "Player ESP", function()
 		exploits.PlayerEsp = not exploits.PlayerEsp
 
 		for _, v in pairs(configurations.PlayerEsp.Table) do
@@ -291,18 +325,42 @@ local function createGui()
 		end
 	end, true)
 
-	createButton(generateUUID(), "No Fall", function()
-		exploits.NoFall = not exploits.NoFall
-	end, true)
-
-	createButton(generateUUID(), "Auto Pickup", function()
+	local aPickup = createButton(generateUUID(), "Auto Pickup", function()
 		exploits.AutoPickup = not exploits.AutoPickup
 	end, true)
+	
+	local nFall = createButton(generateUUID(), "No Fall", function()
+		exploits.NoFall = not exploits.NoFall
+	end, true)
+	
+	--[[local configMenu = createExtraGui()
+	configMenu.Enabled = false
+	
+	local configs
+	configs = createButton(generateUUID(), "Config.", function()
+		exploits.Configurations = not exploits.Configurations
+		
+		if (exploits.Configurations) then
+			configs.BackgroundColor3 = Color3.fromRGB(255, 241, 227)
+		else
+			configs.BackgroundColor3 = Color3.fromRGB(215, 203, 191)
+		end
+		
+		configMenu.Enabled = exploits.Configurations
+	end)
+
+	configs.AutoButtonColor = false]]
+
+	tEsp.LayoutOrder = 1
+	pEsp.LayoutOrder = 2
+	aPickup.LayoutOrder = 3
+	nFall.LayoutOrder = 4
+	--configs.LayoutOrder = 100
 end
 
-local function createExtraGui()
+function createExtraGui()
 	local screenGui = Instance.new("ScreenGui", playerGui)
-	screenGui.Name = generateUUID().."ScreenGui"
+	screenGui.Name = "Configurations"
 
 	screenGui:AddTag("GamingGaming")
 
@@ -329,21 +387,43 @@ local function createExtraGui()
 
 	local boundFrame = Instance.new("Frame", overlay)
 	boundFrame.Name = "BoundFrame"
-	boundFrame.Position = UDim2.new(0.05, 0, 0.05, 0)
-	boundFrame.Size = UDim2.new(0.9, 0, 0.9, 0)
+	boundFrame.Position = UDim2.new(0, 10, 0, 10)
+	boundFrame.Size = UDim2.new(1, -20, 1, -20)
 	boundFrame.BackgroundTransparency = 1
 
-	list = boundFrame
+	local title = Instance.new("TextLabel", boundFrame)
+	title.Name = "Title"
+	title.Text = "CONFIGURATIONS"
+	title.BackgroundTransparency = 1
+	title.Size = UDim2.new(1, 0, .078,  0)
+	title.TextTransparency = 0
+	title.TextStrokeTransparency = .8
+	title.TextSize = 13
+	title.RichText = true
+	title.FontFace = Font.new("rbxasset://fonts/families/Balthazar.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+	title.TextWrapped = false
+	title.TextColor3 = Color3.fromRGB(255, 232, 163)
 
-	local uiListLayout = Instance.new("UIListLayout", boundFrame)
-	uiListLayout.Padding = UDim.new(0.05, 0)
+	local buttonsFrame = Instance.new("Frame", boundFrame)
+	buttonsFrame.Name = "ButtonsFrame"
+	buttonsFrame.Position = UDim2.new(.047,  0, .125, 0)
+	buttonsFrame.Size = UDim2.new(.9, 0, .875, 0)
+	buttonsFrame.BackgroundTransparency = 1
+	
+	local uiListLayout = Instance.new("UIListLayout", buttonsFrame)
+	uiListLayout.Padding = UDim.new(0.1, 0)
 	uiListLayout.FillDirection = Enum.FillDirection.Horizontal
+	uiListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	uiListLayout.Wraps =  true
+	uiListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+	uiListLayout.HorizontalFlex = Enum.UIFlexAlignment.SpaceBetween
+	uiListLayout.VerticalAlignment = Enum.VerticalAlignment.Top
 
-	gui = screenGui
-
-	createButton(generateUUID(), "Common", function()
+	--[[createButton(generateUUID(), "Common", function()
 		
-	end, true) -- Trinket <font color="rgb(255,50,50">ESP</font>
+	end, true) -- Trinket <font color="rgb(255,50,50">ESP</font>]]
+	
+	return screenGui
 end
 
 local function checkIllu(plr)
@@ -444,6 +524,8 @@ function esp()
 				trinketName = "Nightstone"
 			elseif (v.Color == Color3.fromRGB(248, 217, 109)) then
 				trinketName = "Scroom Key"
+			elseif (v.Color == Color3.fromRGB(21, 30, 38)) and (v.Material == Enum.Material.Neon) then
+				trinketName = "Solan Key"
 			elseif (v.Color == Color3.fromRGB(211, 0, 0)) and (v:FindFirstChildOfClass("Attachment")) then
 				if (v:FindFirstChildOfClass("Attachment"):FindFirstChild("OrbParticle")) then
 					trinketName = "Idol of War"
@@ -466,6 +548,12 @@ function esp()
 				trinketName = "Candy"
 			elseif (v.MeshId == "rbxassetid://2520762076") then
 				trinketName = "Howler Friend"
+			elseif (v.MeshId == "rbxassetid://439102658") then
+				if (v.Material == Enum.Material.Neon) then
+					trinketName = "Phoenix Feather"
+				elseif (v.Material == Enum.Material.Sandstone) then
+					trinketName = "Harpy Friend"
+				end
 			end
 		elseif (v:IsA("Part")) then
 			if (v:FindFirstChildOfClass("SpecialMesh")) then
@@ -488,6 +576,10 @@ function esp()
 						trinketName = "Nature Essence"
 					elseif (v.Color == Color3.fromRGB(248, 248, 248)) then
 						trinketName = "Opal"
+					elseif (v.Material == Enum.Material.Plastic) or (v.Material == Enum.Material.Fabric) then
+						if (v:FindFirstChildOfClass("UnionOperation")) then
+							trinketName = "Ornament"
+						end
 					end
 				end
 			elseif (v:FindFirstChildOfClass("Attachment")) then
@@ -505,7 +597,11 @@ function esp()
 					end
 				end
 			end
-
+			
+			if (v:FindFirstChild("Horn1") or v:FindFirstChild("Horn2")) then
+				trinketName = "Azael Horns"
+			end
+			
 			if (v:FindFirstChildOfClass("ParticleEmitter")) then
 				if (v:FindFirstChildOfClass("ParticleEmitter").Texture == "rbxassetid://20443483") then
 					if (v:FindFirstChildOfClass("PointLight")) then
@@ -527,6 +623,9 @@ function esp()
 		
 		trinketType = configurations.TrinketEsp.TrinketList[trinketName]
 		local trinketTier = configurations.TrinketEsp.ColorCoding[trinketType]
+		if (configurations.TrinketEsp.ColorCoding.Specifics[trinketName]) then
+			trinketTier = configurations.TrinketEsp.ColorCoding.Specifics[trinketName]
+		end
 		
 		if (not trinketTier) then continue end
 		if (not trinketTier.Show) then
@@ -586,19 +685,23 @@ connect = game:GetService("RunService").Heartbeat:Connect(function()
 	end
 	
 	if (exploits.AutoPickup) and (configurations.AutoPickup.CanAutoPickup) then
-		for _, v in pairs(workspace.Trinkets:GetChildren()) do
-			if (root.Position - v.Position).Magnitude <= 5 then
+		if (tick() - configurations.AutoPickup.LastUpdated) > 0.7 then
+			configurations.AutoPickup.LastUpdated = tick()
+
+			for _, v in pairs(workspace.Trinkets:GetChildren()) do
 				if (v:FindFirstChild("ClickPart")) then
 					if (v.ClickPart:FindFirstChildOfClass("ClickDetector")) then
-						if fireclickdetector then
-							fireclickdetector(v.ClickPart:FindFirstChildOfClass("ClickDetector"))
-						else
-							warn("Your exploit doesn't have needed dependencies.")
-							warn("Missing: 'fireclickdetector'.")
-							
-							configurations.AutoPickup.CanAutoPickup = false
-							
-							break
+						if (root.Position - v.Position).Magnitude <= v.ClickPart:FindFirstChildOfClass("ClickDetector").MaxActivationDistance * configurations.AutoPickup.Percent then
+							if fireclickdetector then
+								fireclickdetector(v.ClickPart:FindFirstChildOfClass("ClickDetector"))
+							else
+								warn("Your exploit doesn't have needed dependencies.")
+								warn("Missing: 'fireclickdetector'.")
+
+								configurations.AutoPickup.CanAutoPickup = false
+
+								break
+							end
 						end
 					end
 				end
