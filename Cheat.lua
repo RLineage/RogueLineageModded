@@ -1,4 +1,10 @@
+if (not game:IsLoaded()) then
+	repeat task.wait(.1) until game:IsLoaded()
+end
+
 local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local root = character:FindFirstChild("HumanoidRootPart") or character:WaitForChild("HumanoidRootPart")
 
 local playerGui = player.PlayerGui
 playerGui:AddTag("GamingGaming")
@@ -9,43 +15,142 @@ for _, v in pairs(playerGui:GetDescendants()) do
 	end
 end
 
-local range = 1000
-
 local list = nil
 local gui = nil
 
-local nofall = false
+local exploits = {
+	TrinketEsp = false,
+	PlayerEsp = false,
+	NoFall = false,
+	AutoPickup = false,
+}
 
-local _character = player.Character or player.CharacterAdded:Wait()
+local configurations = {
+	TrinketEsp = {
+		KnownMeshList = {
+			["rbxassetid://5196551436"] = "Amulet",
+			["rbxassetid://5196577540"] = "Old Amulet",
+			["rbxassetid://5196776695"] = "Ring",
+			["rbxassetid://5196782997"] = "Old Ring",
+			["rbxassetid://5204003946"] = "Goblet",
+		},
+		ColorCoding = {
+			Common = {
+				Show = true,
+				Color = Color3.fromRGB(255, 255, 255),
+				Range = 350
+			},
+			Rare = {
+				Show = true,
+				Color = Color3.fromRGB(0, 255, 247),
+				Range = 350
+			},
+			Gem = {
+				Show = true,
+				Color = Color3.fromRGB(0, 132, 255),
+				Range = 350
+			},
+			Event = {
+				Show = true,
+				Color = Color3.fromRGB(130, 255, 108),
+				Range = 450
+			},
+			SemiArtifact = {
+				Show = true,
+				Color = Color3.fromRGB(255, 140, 0),
+				Range = 1000
+			},
+			Artifact = {
+				Show = true,
+				Color = Color3.fromRGB(255, 0, 0),
+				Range = 1250
+			},
+			Unknown = {
+				Show = true,
+				Color = Color3.fromRGB(225, 0, 255),
+				Range = 1250
+			},
+			Specifics = {
+				["Rift Gem"] = {
+					Show = true,
+					Color = Color3.fromRGB(255, 0, 255),
+					Range = 1250
+				},
+			},
+		},
+		TrinketList = {
+			["Old Amulet"] = "Common",
+			["Amulet"] = "Common",
+			["Old Ring"] = "Common",
+			["Ring"] = "Common",
+			["Goblet"] = "Common",
+			["Idol of the Forgotten"] = "Common",
+
+			["Ruby"] = "Gem",
+			["Emerald"] = "Gem",
+			["Opal"] = "Gem",
+			["Sapphire"] = "Gem",
+			["Diamond"] = "Gem",
+
+			["???"] = "Rare",
+			["Scroll"] = "Rare",
+			["Ice Essence"] = "Rare",
+
+			["Idol of War"] = "Event",
+			["Candy"] = "Event",
+
+			["Phoenix Down"] = "SemiArtifact",
+			["Phoenix Flower"] = "SemiArtifact",
+
+			["Howler Friend"] = "Artifact",
+			["Azael Horn"] = "Artifact",
+			["Spider Cloak"] = "Artifact",
+			["Philosopher's Stone"] = "Artifact",
+			["Nightstone"] = "Artifact",
+			["Scroom Key"] = "Artifact",
+			["Mysterious Artifact"] = "Artifact",
+			["Rift Gem"] = "Artifact",
+			["White Kings Amulet"] = "Artifact",
+			["Lannis' Amulet"] = "Artifact",
+			["Fairfrozen"] = "Artifact",
+			["Nature Essence"] = "Artifact",
+
+			["Unknown"] = "Unknown"
+		},
+		MaxRange = 1250,
+		LastUpdated = tick(),
+		Table = {},
+	},
+	PlayerEsp = {
+		LastUpdated = tick(),
+		Table = {},	
+	},
+	NoFall = {
+		NoFallLeg = character:FindFirstChild("Right Leg"):Clone()	
+	},
+	AutoPickup = {
+		CanAutoPickup = true	
+	},
+}
+
 for _, v in pairs(workspace:GetChildren()) do
 	if (v.Name == "NofallLeg") or (v:HasTag("GamingGaming")) then
 		v:Destroy()
 	end
 end
 
-local nofallleg = _character:FindFirstChild("Right Leg"):Clone()
-nofallleg.Parent = workspace
-nofallleg.Name = "NofallLeg"
-nofallleg.CanCollide = false
-nofallleg.Anchored = false
-nofallleg.Transparency =1 
-nofallleg.Size += Vector3.new(1,.4,1)
+configurations.NoFall.NoFallLeg.Parent = workspace
+configurations.NoFall.NoFallLeg.Name = "NofallLeg"
+configurations.NoFall.NoFallLeg.CanCollide = false
+configurations.NoFall.NoFallLeg.Anchored = false
+configurations.NoFall.NoFallLeg.Transparency =1 
+configurations.NoFall.NoFallLeg.Size += Vector3.new(1,.4,1)
 
-local weld = Instance.new("Weld", nofallleg)
-weld.Part0 = _character:FindFirstChild("HumanoidRootPart")
-weld.Part1 = nofallleg
+local weld = Instance.new("Weld", configurations.NoFall.NoFallLeg)
+weld.Part0 = root
+weld.Part1 = configurations.NoFall.NoFallLeg
 weld.C0 = CFrame.new(0, -2, 0)
 weld.C1	= CFrame.new(0, 0, 0)
-
-local fallRemote = _character:WaitForChild("CharacterHandler"):WaitForChild("Remotes"):WaitForChild("ApplyFallDamage")
-
-local trinketList = {
-	["rbxassetid://5196551436"] = "Amulet",
-	["rbxassetid://5196577540"] = "Old Amulet",
-	["rbxassetid://5196776695"] = "Ring",
-	["rbxassetid://5196782997"] = "Old Ring",
-	["rbxassetid://5204003946"] = "Goblet",
-}
 
 function generateUUID()
 	local table1 = { "A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z" }
@@ -70,45 +175,6 @@ function generateUUID()
 	end
 
 	return uuid
-end
-
-function generateText(properties)
-	local text = ""
-	
-	for _, textPiece in pairs(properties) do
-		local last = ""
-		local changed = false
-		if (textPiece.color) or (textPiece.italic) or (text.bold) then
-			text ..= "<font"
-			last = '</font>'
-		end
-		if (textPiece.color) then
-			changed = true
-
-			text ..= ' color="rgb('..textPiece.color.R * 255 ..","..textPiece.color.G * 255 ..","..textPiece.color.B * 255 ..')"'	
-		end
-		if (textPiece.italic) then
-			changed = true
-
-			text ..= ' italic="true"'
-		end
-		if (textPiece.bold) then
-			changed = true
-
-			text ..= ' bold="true"'
-		end
-	
-		if (changed) then
-			text ..= ">"
-		end
-		
-		text..= textPiece.text
-		text..= last
-	end
-	
-	print( text)
-	
-	return text
 end
 
 local function createButton(name, text, mouse1click, toggle)
@@ -155,12 +221,6 @@ local function createButton(name, text, mouse1click, toggle)
 		button.MouseButton1Click:Connect(mouse1click)
 	end
 end
-
-local espEnabled = false
-local espTable:{BillboardGui} = {}
-
-local playerEspEnabled = false
-local playerEspTable = {}
 
 local function createGui()
 	if (gui ~= nil) then
@@ -216,27 +276,75 @@ local function createGui()
 	gui = screenGui
 	
 	createButton(generateUUID(), "Trinket ESP", function()
-		espEnabled = not espEnabled
+		exploits.TrinketEsp = not exploits.TrinketEsp
 		
-		for _, v in pairs(espTable) do
-			v.Enabled = espEnabled
+		for _, v in pairs(configurations.TrinketEsp.Table) do
+			v.Enabled = exploits.TrinketEsp
 		end
-	end) -- Trinket <font color="rgb(255,50,50">ESP</font>
+	end, true) -- Trinket <font color="rgb(255,50,50">ESP</font>
 
 	createButton(generateUUID(), "Player ESP", function()
-		playerEspEnabled = not playerEspEnabled
+		exploits.PlayerEsp = not exploits.PlayerEsp
 
-		for _, v in pairs(playerEspTable) do
-			v.Enabled = playerEspEnabled
+		for _, v in pairs(configurations.PlayerEsp.Table) do
+			v.Enabled = exploits.PlayerEsp
 		end
-	end)
-	
+	end, true)
+
 	createButton(generateUUID(), "No Fall", function()
-		nofall = not nofall
+		exploits.NoFall = not exploits.NoFall
+	end, true)
+
+	createButton(generateUUID(), "Auto Pickup", function()
+		exploits.AutoPickup = not exploits.AutoPickup
 	end, true)
 end
 
--- Trinket Trinket <font color="rgb(1,0.19607843458652496,0.19607843458652496)">ESPTrinket Trinket <font color="rgb(1,0.19607843458652496,0.19607843458652496)">ESP
+local function createExtraGui()
+	local screenGui = Instance.new("ScreenGui", playerGui)
+	screenGui.Name = generateUUID().."ScreenGui"
+
+	screenGui:AddTag("GamingGaming")
+
+	local frame = Instance.new("Frame", screenGui)
+	frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+	frame.BackgroundTransparency = 0.8
+	frame.Position = UDim2.new(0.1, 0, 0.1, 0)
+	frame.Size = UDim2.new(0, 250, 0, 250)
+	frame.Name = generateUUID().."Frame"
+
+	local uiDragDetector = Instance.new("UIDragDetector", frame)
+
+	local overlay = Instance.new("ImageLabel", frame)
+	overlay.Name = "Overlay"
+	overlay.Position = UDim2.new(0.5, 0, 0.5, 0)
+	overlay.Size = UDim2.new(1, 4, 1, 4)
+	overlay.BackgroundTransparency = 1
+	overlay.Image = "rbxassetid://2739347995"
+	overlay.ImageColor3 = Color3.fromRGB(245, 197, 130)
+	overlay.ScaleType = Enum.ScaleType.Slice
+	overlay.SliceCenter = Rect.new(5, 5, 5, 5)
+	overlay.AnchorPoint = Vector2.new(0.5, 0.5)
+	overlay.ZIndex = 0
+
+	local boundFrame = Instance.new("Frame", overlay)
+	boundFrame.Name = "BoundFrame"
+	boundFrame.Position = UDim2.new(0.05, 0, 0.05, 0)
+	boundFrame.Size = UDim2.new(0.9, 0, 0.9, 0)
+	boundFrame.BackgroundTransparency = 1
+
+	list = boundFrame
+
+	local uiListLayout = Instance.new("UIListLayout", boundFrame)
+	uiListLayout.Padding = UDim.new(0.05, 0)
+	uiListLayout.FillDirection = Enum.FillDirection.Horizontal
+
+	gui = screenGui
+
+	createButton(generateUUID(), "Common", function()
+		
+	end, true) -- Trinket <font color="rgb(255,50,50">ESP</font>
+end
 
 local function checkIllu(plr)
 	local illu = false
@@ -261,28 +369,24 @@ function playerEsp()
 		playerEspFolder.Name = "PlayerEsp"
 	end
 	
-	for i, v in pairs(playerEspTable) do
+	for i, v in pairs(configurations.PlayerEsp.Table) do
 		v:Destroy()
 		
-		playerEspTable[i] = nil
+		configurations.PlayerEsp.Table[i] = nil
 	end
 
 	for _,v in pairs(game.Players:GetChildren()) do
-		if (player == v) then continue end
-		--[[if (not player:FindFirstChild("Ingame")) then
-			continue
-		end]]
+		if (player == v) and (game.PlaceId ~= 18459294953) then continue end
 		
 		local char = v.Character or v.CharacterAdded:Wait()
+		if (not char) then continue end
 		if (not char:FindFirstChild("HumanoidRootPart")) then continue end
-		
-		print(v.Name)
 		
 		local billboard = Instance.new("BillboardGui", playerEspFolder)
 		billboard.Adornee = char.HumanoidRootPart
 		billboard.AlwaysOnTop = true
 		billboard.MaxDistance = math.huge
-		billboard.Enabled = playerEspEnabled
+		billboard.Enabled = exploits.PlayerEsp
 		billboard.Size = UDim2.new(0, 50, 0, 50)
 
 		local text = Instance.new("TextLabel", billboard)
@@ -295,11 +399,9 @@ function playerEsp()
 
 		if checkIllu(v) then
 			text.TextColor3 = Color3.fromRGB(30, 206, 255)
-		else
-			text.TextColor3 = Color3.fromRGB(255,255,255)
 		end
 		
-		table.insert(playerEspTable, billboard)
+		table.insert(configurations.PlayerEsp.Table, billboard)
 	end
 end
 
@@ -317,101 +419,75 @@ function esp()
 
 	local trinkets = workspace.Trinkets
 
-	for i, v in pairs(espTable) do
+	for i, v in pairs(configurations.TrinketEsp.Table) do
 		v:Destroy()
 		
-		espTable[i] = nil
+		configurations.TrinketEsp.Table[i] = nil
 	end
 
 	for _,v in pairs(trinkets:GetChildren()) do
-		if (root.Position - v.Position).Magnitude >= range then continue end
-		
 		if (not v:FindFirstChild("ClickPart")) then continue end
 		
-		local billboard = Instance.new("BillboardGui", esptrinket)
-		billboard.Adornee = v.ClickPart
-		billboard.AlwaysOnTop = true
-		billboard.MaxDistance = range
-		billboard.Enabled = espEnabled
-		billboard.Size = UDim2.new(0, 75, 0, 75)
-		
-		local text = Instance.new("TextLabel", billboard)
-		text.Text = "funny thing huh"
-		text.Size = UDim2.new(1,0,1,0)
-		text.Position = UDim2.new(0,0,0,0)
-		text.BackgroundTransparency = 1
-		text.TextColor3 = Color3.fromRGB(255,255,255)
-		text.TextSize = 24
-		
+		local trinketType = "" -- Common, Rare, Gem, Event, SemiArtifact, Artifact, Unknown
+		local trinketName = ""
+
 		if (v:IsA("UnionOperation")) then
 			if (v.Color == Color3.fromRGB(255,89,89)) and (v.Material == Enum.Material.Neon) then
-				text.Text = "Philosopher's Stone"
-				text.TextColor3 = Color3.fromRGB(255, 0, 0)
+				trinketName = "Philosopher's Stone"
 			elseif (v.Color == Color3.fromRGB(248,248,248)) and (v.Material == Enum.Material.Neon) and (v:FindFirstChildOfClass("PointLight")) then
-				text.Text = "White Kings Amulet"
-				text.TextColor3  = Color3.fromRGB(255, 0, 0)
+				trinketName = "White Kings Amulet"
 			elseif (v.Color == Color3.fromRGB(111, 113, 125)) and (v.Material == Enum.Material.Slate) and (v:FindFirstChildOfClass("ParticleEmitter")) then
-				text.Text = "Idol of Forgotten"
+				trinketName = "Idol of the Forgotten"
 			elseif (v.Color == Color3.fromRGB(248,248,248)) and (v.Material == Enum.Material.Neon) and (not v:FindFirstChildOfClass("ParticleEmitter")) then
-				text.Text = "Lannis' Amulet"
-				text.TextColor3 = Color3.fromRGB(136, 0, 255)
+				trinketName = "Lannis' Amulet"
 			elseif (v.Color == Color3.fromRGB(29, 46, 58)) and (v.Material == Enum.Material.Neon) and (not v:FindFirstChildOfClass("ParticleEmitter")) then
-				text.Text = "Nightstone"
-				text.TextColor3 = Color3.fromRGB(0, 17, 255)
+				trinketName = "Nightstone"
 			elseif (v.Color == Color3.fromRGB(248, 217, 109)) then
-				text.Text = "Scroom Key"
-				text.TextColor3 = Color3.fromRGB(248, 217, 109)
+				trinketName = "Scroom Key"
 			elseif (v.Color == Color3.fromRGB(211, 0, 0)) and (v:FindFirstChildOfClass("Attachment")) then
 				if (v:FindFirstChildOfClass("Attachment"):FindFirstChild("OrbParticle")) then
-					text.Text = "Idol of War"
-					text.TextColor3 = Color3.fromRGB(141, 255, 139)
+					trinketName = "Idol of War"
 				end
 			end
 		elseif (v:IsA("MeshPart")) then
-			if (trinketList[v.MeshId]) then
-				text.Text = trinketList[v.MeshId]
+			if (configurations.TrinketEsp.KnownMeshList[v.MeshId]) then
+				trinketName = configurations.TrinketEsp.KnownMeshList[v.MeshId]
 			end
 
 			if (v.MeshId == "rbxassetid://%202877143560%20") then
-				text.Text = "Gem"
-				
+				trinketName = "Gem"
+
 				if (v.Color == Color3.fromRGB(255, 0, 0)) then
-					text.Text = "Ruby"
+					trinketName = "Ruby"
 				end
 			elseif (v.MeshId == "rbxassetid://5204453430") then
-				text.Text = "Scroll"
+				trinketName = "Scroll"
 			elseif (v.MeshId == "rbxassetid://923469333") then
-				text.Text = "Candy"
-				text.TextColor3 = Color3.fromRGB(141, 255, 139)
+				trinketName = "Candy"
 			elseif (v.MeshId == "rbxassetid://2520762076") then
-				text.Text = "Howler Friend"
-				text.TextColor3 = Color3.fromRGB(255, 114, 49)
+				trinketName = "Howler Friend"
 			end
 		elseif (v:IsA("Part")) then
 			if (v:FindFirstChildOfClass("SpecialMesh")) then
 				if (v:FindFirstChildOfClass("SpecialMesh").MeshId == "rbxassetid://%202877143560%20") then
-					text.Text = "Gem"
-					text.TextColor3	= Color3.fromRGB(255, 194, 194)
+					trinketName = "Gem"
 					
 					if (v.Color == Color3.fromRGB(255, 0, 191)) then
-						text.Text = "Rift Gem"
-						text.TextColor3	= Color3.fromRGB(255, 0, 191)
+						trinketName = "Rift Gem"
 					elseif (v.Color == Color3.fromRGB(0, 184, 49)) then
-						text.Text = "Emerald"
+						trinketName = "Emerald"
 					elseif (v.Color == Color3.fromRGB(164, 187, 190)) then
-						text.Text = "Diamond"
+						trinketName = "Diamond"
 					elseif (v.Color == Color3.fromRGB(16, 42, 220)) then
-						text.Text = "Sapphire"
+						trinketName = "Sapphire"
 					end
 				elseif (v:FindFirstChildOfClass("SpecialMesh").MeshType == Enum.MeshType.Sphere) then
 					if (v.Color == Color3.fromRGB(128, 187, 219)) then
-						text.Text = "Fairfrozen"
-						text.TextColor3 = Color3.fromRGB(128, 187, 219)
+						trinketName = "Fairfrozen"
 					elseif (v.Color == Color3.fromRGB(143, 219, 122)) then
-						text.Text = "Nature Essence"
-						text.TextColor3 = Color3.fromRGB(143, 219, 122)
+						trinketName = "Nature Essence"
 					elseif (v.Color == Color3.fromRGB(248, 248, 248)) then
-						text.Text = "Opal"
+						trinketName = "Opal"
 					end
 				end
 			elseif (v:FindFirstChildOfClass("Attachment")) then
@@ -420,96 +496,138 @@ function esp()
 						-- pd, ma or azael horn
 						local particle = v:FindFirstChildOfClass("Attachment"):FindFirstChildOfClass("ParticleEmitter")
 						if (particle.LightEmission == 0.5) and (particle.Color ~= ColorSequence.new(Color3.fromRGB(255, 10, 10))) then
-							text.Text = "Phoenix Down"
-							text.TextColor3 = Color3.fromRGB(255, 140, 0)
+							trinketName = "Phoenix Down"
 						elseif (particle.Color == ColorSequence.new({ColorSequenceKeypoint.new(0, Color3.new(0.45098, 1, 0, 0)), ColorSequenceKeypoint.new(1, Color3.new(0.482353, 1, 0, 0))})) then
-							text.Text = "Mysterious Artifact"
-							text.TextColor3 = Color3.fromRGB(98, 255, 0)
+							trinketName = "Mysterious Artifact"
 						else
-							text.Text = "Phoenix Flower"
-							text.TextColor3 = Color3.fromRGB(255, 0, 4)
+							trinketName = "Phoenix Flower"
 						end
 					end
 				end
 			end
-			
+
 			if (v:FindFirstChildOfClass("ParticleEmitter")) then
 				if (v:FindFirstChildOfClass("ParticleEmitter").Texture == "rbxassetid://20443483") then
 					if (v:FindFirstChildOfClass("PointLight")) then
 						if (v:FindFirstChildOfClass("PointLight").Color == Color3.fromRGB(132,255,0)) and (v.Color ~= Color3.fromRGB(255,255,0)) then
-							text.Text = "Ice Essence"
-							text.TextColor3 = Color3.fromRGB(53, 255, 188)
+							trinketName = "Ice Essence"
 						elseif (v:FindFirstChildOfClass("PointLight").Color == Color3.fromRGB(106, 56, 255)) or (v.Color == Color3.fromRGB(89,34, 89)) then
-							text.Text = "???"
-							text.TextColor3 = Color3.fromRGB(151, 0, 52)
+							trinketName = "???"
 						elseif (v:FindFirstChildOfClass("PointLight").Color == Color3.fromRGB(132,255,0)) then
-							text.Text = "Spider Cloak"
-							text.TextColor3 = Color3.fromRGB(255, 255, 0)
+							trinketName = "Spider Cloak"
 						end
 					end
 				end
 			end
 		end
-		
-		if (text.Text == "funny thing huh") then
-			text.Text = "UNKNOWN"
-			text.TextColor3 = Color3.fromRGB(251, 255, 0)
-			
-			local unknown = Instance.new("Folder", v)
-			unknown.Name = "Unknown"
+
+		if (trinketName == "") then
+			trinketName = "Unknown"
 		end
 		
-		table.insert(espTable, billboard)
+		trinketType = configurations.TrinketEsp.TrinketList[trinketName]
+		local trinketTier = configurations.TrinketEsp.ColorCoding[trinketType]
+		
+		if (not trinketTier) then continue end
+		if (not trinketTier.Show) then
+			continue
+		end
+
+		local distance = (root.Position - v.Position).Magnitude
+		if (distance >= trinketTier.Range) or (distance >= configurations.TrinketEsp.MaxRange) then continue end
+
+		local billboard = Instance.new("BillboardGui", esptrinket)
+		billboard.Adornee = v.ClickPart
+		billboard.AlwaysOnTop = true
+		billboard.MaxDistance = trinketTier.Range
+		billboard.Enabled = exploits.TrinketEsp
+		billboard.Size = UDim2.new(0, 75, 0, 75)
+		
+		local text = Instance.new("TextLabel", billboard)
+		text.Text = trinketName
+		text.Font = Enum.Font.Antique
+		text.Size = UDim2.new(1,0,1,0)
+		text.Position = UDim2.new(0,0,0,0)
+		text.BackgroundTransparency = 1
+		text.TextColor3 = trinketTier.Color
+		text.TextTransparency = 0
+		text.TextStrokeTransparency = 0
+		text.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+		text.RichText = true
+		text.FontFace = Font.new("rbxasset://fonts/families/Balthazar.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+		text.TextWrapped = true
+		text.TextSize = 16
+		
+		table.insert(configurations.TrinketEsp.Table, billboard)
 	end
 end
-
--- 0 ,0.45098, 1, 0, 0, 1, 0.482353, 1, 0 ,0
 
 createGui()
 esp()
 
 playerGui:RemoveTag("GamingGaming")
 
-local lastpespupdated = tick()
-local lastupdated = tick()
-
 local connect:RBXScriptConnection = nil
 connect = game:GetService("RunService").Heartbeat:Connect(function()
-	if (playerEspEnabled) then
-		if (tick() - lastpespupdated) > 3 then
+	if (exploits.PlayerEsp) then
+		if (tick() - configurations.PlayerEsp.LastUpdated) > 3 then
 			playerEsp()
 
-			lastpespupdated = tick()
+			configurations.PlayerEsp.LastUpdated = tick()
 		end
 	end
 	
-	if (espEnabled) then
-		if (tick() - lastupdated) > 3 then
+	if (exploits.TrinketEsp) then
+		if (tick() - configurations.TrinketEsp.LastUpdated) > 3 then
 			esp()
 
-			lastupdated = tick()
+			configurations.TrinketEsp.LastUpdated = tick()
+		end
+	end
+	
+	if (exploits.AutoPickup) and (configurations.AutoPickup.CanAutoPickup) then
+		for _, v in pairs(workspace.Trinkets:GetChildren()) do
+			if (root.Position - v.Position).Magnitude <= 5 then
+				if (v:FindFirstChild("ClickPart")) then
+					if (v.ClickPart:FindFirstChildOfClass("ClickDetector")) then
+						if fireclickdetector then
+							fireclickdetector(v.ClickPart:FindFirstChildOfClass("ClickDetector"))
+						else
+							warn("Your exploit doesn't have needed dependencies.")
+							warn("Missing: 'fireclickdetector'.")
+							
+							configurations.AutoPickup.CanAutoPickup = false
+							
+							break
+						end
+					end
+				end
+			end
 		end
 	end
 
-	nofallleg.CanCollide = nofall
+	configurations.NoFall.NoFallLeg.CanCollide = exploits.NoFall
 	
 	if (playerGui:HasTag("GamingGaming")) then
-		for _, v in pairs(playerEspTable) do
+		for _, v in pairs(configurations.PlayerEsp.Table) do
 			v:Destroy()
 		end
-		for _, v in pairs(espTable) do
+		for _, v in pairs(configurations.TrinketEsp.Table) do
 			v:Destroy()
 		end
-		nofallleg:Destroy()
-		weld:Destroy()
+
+		exploits.AutoPickup = false
+		exploits.TrinketEsp = false
+		exploits.PlayerEsp = false
+		exploits.NoFall = false
+		
+		configurations.NoFall.NoFallLeg:Destroy()
 		
 		for _, v in pairs(playerGui:GetChildren()) do
 			if (v:HasTag("GamingGaming")) then
 				v:Destroy()
 			end
 		end
-		
-		print("REMOVED GUI GAMINGGAMING")
 		
 		connect:Disconnect()
 	end
