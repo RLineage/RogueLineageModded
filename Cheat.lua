@@ -535,6 +535,7 @@ function godObserve()
 		playerLabel.TextStrokeTransparency = 0.5
 		playerLabel.Text = ""
 		playerLabel.TextXAlignment = Enum.TextXAlignment.Left
+		playerLabel.Visible = true
 
 		local prestigeLabel = Instance.new("TextButton", playerLabel)
 		prestigeLabel.BackgroundTransparency = 1
@@ -550,19 +551,20 @@ function godObserve()
 		prestigeLabel.TextTransparency = 0.2
 		prestigeLabel.TextXAlignment = Enum.TextXAlignment.Left
 		prestigeLabel.Text = "#???"
+		prestigeLabel.Visible = false
 		
 		local function renew()
 			playerLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
 			
-			local leaderstats = plr.leaderstats
+			local leaderstats = plr:WaitForChild("leaderstats")
 
-			local firstName = leaderstats.FirstName.Value
-			local lastName = leaderstats.LastName.Value
-			local houseRank = leaderstats.HouseRank.Value
-			local gender = leaderstats.Gender.Value
-			local maxEdict = leaderstats.MaxEdict.Value
-			local prestige = leaderstats.Prestige.Value
-			local uberTitle = leaderstats.UberTitle.Value
+			local firstName = leaderstats:WaitForChild("FirstName").Value
+			local lastName = leaderstats:WaitForChild("LastName").Value
+			local houseRank = leaderstats:WaitForChild("HouseRank").Value
+			local gender = leaderstats:WaitForChild("Gender").Value
+			local maxEdict = leaderstats:WaitForChild("MaxEdict").Value
+			local prestige = leaderstats:WaitForChild("Prestige").Value
+			local uberTitle = leaderstats:WaitForChild("UberTitle").Value
 
 			local name = ""
 
@@ -604,18 +606,36 @@ function godObserve()
 					playerLabel.TextColor3 = Color3.fromRGB(0, 242, 255)
 				end
 			end
-			if (not player:FindFirstChild("Ingame")) then
-				playerLabel.TextColor3 = playerLabel.TextColor3:Lerp(Color3.fromRGB(0, 0, 0), .5)
+			
+			local outofgame = false
+			
+			if (plr:FindFirstChild("Ingame")) then
+			else
+				outofgame = true
 			end
 			
-			if (mouseInside) then
+			if not outofgame then
+				if (plr:FindFirstChild("ReturnToMenu")) then
+					outofgame = true
+				end
+			end
+			
+			if (outofgame) then
+				playerLabel.TextColor3 = playerLabel.TextColor3:Lerp(Color3.fromRGB(0, 0, 0), .4)
+			end
+			
+			if (mouseInside == true) then
 				playerLabel.TextColor3 = playerLabel.TextColor3:Lerp(Color3.fromRGB(0, 0, 0), .3)
 				name = plr.Name 
 			end
+			
 			playerLabel.Text = name
 		end
 		
 		renew()
+
+		connections[math.random(-99999999999999, 99999999999999)] = plr.ChildAdded:Connect(renew)
+		connections[math.random(-99999999999999, 99999999999999)] = plr.ChildRemoved:Connect(renew)
 
 		connections[math.random(-99999999999999, 99999999999999)] = playerLabel.MouseButton1Click:Connect(function()
 			renew()
@@ -901,6 +921,16 @@ esp()
 
 playerGui:RemoveTag("GamingGaming")
 
+connections.RenderStepped = game:GetService("RunService").RenderStepped:Connect(function()
+	leaderboard.Enabled = not godObserveGui.Enabled
+
+	if (configurations.GodObserve.Observing == false) then
+		workspace.CurrentCamera.CameraSubject = character:FindFirstChildOfClass("Humanoid")
+	else
+		workspace.CurrentCamera.CameraSubject = configurations.GodObserve.Observing	
+	end
+end)
+
 connections.Heartbeat = game:GetService("RunService").Heartbeat:Connect(function()
 	if (exploits.PlayerEsp) then
 		if (tick() - configurations.PlayerEsp.LastUpdated) > 3 then
@@ -948,13 +978,6 @@ connections.Heartbeat = game:GetService("RunService").Heartbeat:Connect(function
 	--[[if (exploits.NoFall) and (configurations.NoFall.CanNoFall) then
 		fallRemote:FireServer(-0.1)
 	end]]
-	
-	if (configurations.GodObserve.Observing == false) then
-		workspace.CurrentCamera.CameraSubject = character:FindFirstChildOfClass("Humanoid")
-	else
-		print("observing")
-		workspace.CurrentCamera.CameraSubject = configurations.GodObserve.Observing	
-	end	
 
 	leaderboard.Enabled = not godObserveGui.Enabled
 
