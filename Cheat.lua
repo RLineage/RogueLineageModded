@@ -2,6 +2,8 @@ if (not game:IsLoaded()) then
 	repeat task.wait(.1) until game:IsLoaded()
 end
 
+local connections:{RBXScriptConnection} = {}
+
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local root = character:FindFirstChild("HumanoidRootPart") or character:WaitForChild("HumanoidRootPart")
@@ -10,6 +12,9 @@ local playerGui = player.PlayerGui
 playerGui:AddTag("GamingGaming")
 
 for _, v in pairs(playerGui:GetDescendants()) do
+	if (v.Name == "GodObserve") then
+		v:Destroy()
+	end
 	if (v:HasTag("GamingGaming")) then
 		v:Destroy()
 	end
@@ -24,6 +29,7 @@ local exploits = {
 	NoFall = false,
 	AutoPickup = false,
 	Configurations = false,
+	GodObserve = true,
 }
 
 local configurations = {
@@ -132,6 +138,7 @@ local configurations = {
 		Table = {},	
 	},
 	NoFall = {
+		CanNoFall = true,
 		NoFallLeg = character:FindFirstChild("Right Leg"):Clone()	
 	},
 	AutoPickup = {
@@ -139,7 +146,41 @@ local configurations = {
 		Percent = 0.9,
 		LastUpdated = tick()
 	},
+	GodObserve = {
+		UltraClasses = {
+			"sigilknightcommander",
+			"facelessone",
+			"shinobi",
+			"oni",
+			""
+		},
+		Observing = false,
+	}
 }
+
+local fallRemote
+local s, m = pcall(function()
+	fallRemote = character:FindFirstChild("CharacterHandler"):FindFirstChild("Remotes"):FindFirstChild("ApplyFallDamage")
+end)
+if (not s) then
+	warn("No Fall couldn't be initialized!")
+	warn(m)
+	configurations.NoFall.CanNoFall = false
+end
+
+connections.CharacterAdded = player.CharacterAdded:Connect(function(char)
+	character = char
+	root = character:FindFirstChild("HumanoidRootPart")
+	
+	local s, m = pcall(function()
+		fallRemote = character:FindFirstChild("CharacterHandler"):FindFirstChild("Remotes"):FindFirstChild("ApplyFallDamage")
+	end)
+	if (not s) then
+		warn("No Fall couldn't be initialized!")
+		warn(m)
+		configurations.NoFall.CanNoFall = false
+	end
+end)
 
 for _, v in pairs(workspace:GetChildren()) do
 	if (v.Name == "NofallLeg") or (v:HasTag("GamingGaming")) then
@@ -247,6 +288,7 @@ local function createGui()
 	
 	local screenGui = Instance.new("ScreenGui", playerGui)
 	screenGui.Name = generateUUID().."ScreenGui"
+	screenGui.ResetOnSpawn = false
 	
 	screenGui:AddTag("GamingGaming")
 	
@@ -361,6 +403,7 @@ end
 function createExtraGui()
 	local screenGui = Instance.new("ScreenGui", playerGui)
 	screenGui.Name = "Configurations"
+	screenGui.ResetOnSpawn = false
 
 	screenGui:AddTag("GamingGaming")
 
@@ -426,18 +469,208 @@ function createExtraGui()
 	return screenGui
 end
 
-local function checkIllu(plr)
-	local illu = false
+local leaderboard = playerGui:FindFirstChild("LeaderboardGui")
 
+local function checkIllu(plr)
 	if (plr.Backpack:FindFirstChild("Observe")) then
-		illu = true
+		return true
 	end
-	if (plr.Character:FindFirstChild("Observe")) then
-		illu = true
+	if (plr.Character) and (plr.Character:FindFirstChild("Observe")) then
+		return "Equipped"
+	end
+
+	return false
+end
+
+function godObserve()
+	local screenGui = Instance.new("ScreenGui", playerGui)
+	screenGui.Name = "GodObserve"
+	screenGui.ResetOnSpawn = false
+	
+	local mainFrame = Instance.new("ImageLabel", screenGui)
+	mainFrame.Position = UDim2.new(1, 0, 0, 0)
+	mainFrame.Size = UDim2.new(0.05, 150, 0, 200)
+	mainFrame.BackgroundTransparency = 1
+	mainFrame.AnchorPoint = Vector2.new(1, 0)
+	mainFrame.ZIndex = 1
+	mainFrame.Image = "rbxassetid://1327087642"
+	mainFrame.ImageColor3 = Color3.fromRGB(255, 255, 255)
+	mainFrame.ImageTransparency = 0.8
+	mainFrame.ScaleType = Enum.ScaleType.Slice
+	mainFrame.SliceCenter = Rect.new(20, 20, 190, 190)
+	mainFrame.SliceScale = 1
+	
+	local scrollingFrame = Instance.new("ScrollingFrame", mainFrame)
+	scrollingFrame.Position = UDim2.new(0, 15, 0, 10)
+	scrollingFrame.Size = UDim2.new(1, -30, 1, -20)
+	scrollingFrame.BackgroundTransparency = 1
+	scrollingFrame.ClipsDescendants = true
+	scrollingFrame.BottomImage = "rbxassetid://3515608177"
+	scrollingFrame.MidImage = "rbxassetid://3515608813"
+	scrollingFrame.TopImage = "rbxassetid://3515609176"
+	scrollingFrame.ScrollBarImageTransparency = 0
+	scrollingFrame.ScrollBarThickness = 10
+	scrollingFrame.ScrollingDirection = Enum.ScrollingDirection.Y
+	scrollingFrame.VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar
+	scrollingFrame.VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Right
+	scrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(121, 245, 231)
+	scrollingFrame.CanvasSize = UDim2.new(0, 0, 2, 0)
+	
+	local uiList = Instance.new("UIListLayout", scrollingFrame)
+	
+	local mouseInside = false
+	
+	local function createPlayerLabel(plr:Player)
+		if (plr == player) then return end
+		
+		local playerLabel = Instance.new("TextButton", scrollingFrame)
+		playerLabel.BackgroundTransparency = 1
+		playerLabel.Size = UDim2.new(1, 0, 0, 20)
+		playerLabel.ClipsDescendants = false
+		playerLabel.FontFace = Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.SemiBold, Enum.FontStyle.Normal)
+		playerLabel.Name = plr.UserId
+		playerLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+		playerLabel.TextSize = 18
+		playerLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+		playerLabel.TextStrokeTransparency = 0.5
+		playerLabel.Text = ""
+		playerLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+		local prestigeLabel = Instance.new("TextButton", playerLabel)
+		prestigeLabel.BackgroundTransparency = 1
+		prestigeLabel.TextSize = 16
+		prestigeLabel.Size = UDim2.new(0, 35, 0, 20)
+		prestigeLabel.Position = UDim2.new(0,0,0,1)
+		prestigeLabel.ClipsDescendants = false
+		prestigeLabel.FontFace = Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.SemiBold, Enum.FontStyle.Normal)
+		prestigeLabel.Name = "Prestige"
+		prestigeLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+		prestigeLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+		prestigeLabel.TextStrokeTransparency = 0.5
+		prestigeLabel.TextTransparency = 0.2
+		prestigeLabel.TextXAlignment = Enum.TextXAlignment.Left
+		prestigeLabel.Text = "#???"
+		
+		local function renew()
+			playerLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+			
+			local leaderstats = plr.leaderstats
+
+			local firstName = leaderstats.FirstName.Value
+			local lastName = leaderstats.LastName.Value
+			local houseRank = leaderstats.HouseRank.Value
+			local gender = leaderstats.Gender.Value
+			local maxEdict = leaderstats.MaxEdict.Value
+			local prestige = leaderstats.Prestige.Value
+			local uberTitle = leaderstats.UberTitle.Value
+
+			local name = ""
+
+			if (houseRank == "Owner") then
+				if (gender == "Female") then
+					name = "Lady "
+				else
+					name = "Lord "
+				end
+
+				if (firstName == "Ratriel") then
+					lastName = "Pontiff"
+				end
+			end
+
+			name ..= firstName
+			if (lastName ~= "") then
+				name ..= " "..lastName
+			end
+			if (uberTitle ~= "") then
+				name ..= ", "..uberTitle
+			end
+			
+			if (maxEdict) then
+				playerLabel.TextColor3 = Color3.fromRGB(255, 255, 105)
+			end
+			if (prestige ~= 0) then
+				playerLabel.Text = "          "
+				prestigeLabel.Visible = true
+				prestigeLabel.Text = "#"..prestige
+			else
+				prestigeLabel.Visible = false	
+			end
+			local illu = checkIllu(player)
+			if (illu) then
+				if (illu == "Equipped") then
+					playerLabel.TextColor3 = Color3.fromRGB(0, 38, 255)
+				else
+					playerLabel.TextColor3 = Color3.fromRGB(0, 242, 255)
+				end
+			end
+			if (not player:FindFirstChild("Ingame")) then
+				playerLabel.TextColor3 = playerLabel.TextColor3:Lerp(Color3.fromRGB(0, 0, 0), .5)
+			end
+			
+			if (mouseInside) then
+				playerLabel.TextColor3 = playerLabel.TextColor3:Lerp(Color3.fromRGB(0, 0, 0), .3)
+				name = plr.Name 
+			end
+			playerLabel.Text = name
+		end
+		
+		renew()
+
+		connections[math.random(-99999999999999, 99999999999999)] = playerLabel.MouseButton1Click:Connect(function()
+			renew()
+
+			if (not plr.Character) then return end
+				if (not plr:FindFirstChild("Ingame")) then
+				return
+			end
+
+			local humanoid
+			local s, m = pcall(function()
+				humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
+			end)
+
+			if (not s) then return end
+
+			if (configurations.GodObserve.Observing == humanoid) then
+				configurations.GodObserve.Observing = false
+			else
+				configurations.GodObserve.Observing = humanoid
+			end
+		end)
+
+		connections[math.random(-99999999999999, 99999999999999)] = playerLabel.MouseEnter:Connect(function()
+			mouseInside = true
+			renew()
+
+			playerLabel.Text = plr.Name
+		end)
+		
+		connections[math.random(-99999999999999, 99999999999999)] = playerLabel.MouseLeave:Connect(function()
+			mouseInside = false
+			renew()
+		end)
+	end
+
+	connections[math.random(-99999999999999, 99999999999999)] = game.Players.PlayerAdded:Connect(function(v)
+		createPlayerLabel(v)
+	end)
+
+	connections[math.random(-99999999999999, 99999999999999)] = game.Players.PlayerRemoving:Connect(function(v)
+		if (scrollingFrame:FindFirstChild(v.UserId)) then
+			scrollingFrame:FindFirstChild(v.UserId):Destroy()
+		end
+	end)
+
+	for _, v in pairs(game.Players:GetPlayers()) do
+		createPlayerLabel(v)
 	end
 	
-	return illu
+	return screenGui
 end
+
+local godObserveGui = godObserve()
+leaderboard.Enabled = false
 
 function playerEsp()
 	local player = game.Players.LocalPlayer
@@ -530,6 +763,8 @@ function esp()
 				if (v:FindFirstChildOfClass("Attachment"):FindFirstChild("OrbParticle")) then
 					trinketName = "Idol of War"
 				end
+			elseif (v.Color == Color3.fromRGB(151, 234, 99)) and (v.Material == Enum.Material.Neon) and (v:FindFirstChildOfClass("UnionOperation")) then
+				trinketName = "Alter Beetle"
 			end
 		elseif (v:IsA("MeshPart")) then
 			if (configurations.TrinketEsp.KnownMeshList[v.MeshId]) then
@@ -666,8 +901,7 @@ esp()
 
 playerGui:RemoveTag("GamingGaming")
 
-local connect:RBXScriptConnection = nil
-connect = game:GetService("RunService").Heartbeat:Connect(function()
+connections.Heartbeat = game:GetService("RunService").Heartbeat:Connect(function()
 	if (exploits.PlayerEsp) then
 		if (tick() - configurations.PlayerEsp.LastUpdated) > 3 then
 			playerEsp()
@@ -711,6 +945,19 @@ connect = game:GetService("RunService").Heartbeat:Connect(function()
 
 	configurations.NoFall.NoFallLeg.CanCollide = exploits.NoFall
 	
+	--[[if (exploits.NoFall) and (configurations.NoFall.CanNoFall) then
+		fallRemote:FireServer(-0.1)
+	end]]
+	
+	if (configurations.GodObserve.Observing == false) then
+		workspace.CurrentCamera.CameraSubject = character:FindFirstChildOfClass("Humanoid")
+	else
+		print("observing")
+		workspace.CurrentCamera.CameraSubject = configurations.GodObserve.Observing	
+	end	
+
+	leaderboard.Enabled = not godObserveGui.Enabled
+
 	if (playerGui:HasTag("GamingGaming")) then
 		for _, v in pairs(configurations.PlayerEsp.Table) do
 			v:Destroy()
@@ -723,8 +970,12 @@ connect = game:GetService("RunService").Heartbeat:Connect(function()
 		exploits.TrinketEsp = false
 		exploits.PlayerEsp = false
 		exploits.NoFall = false
+		exploits.GodObserve = false
 		
 		configurations.NoFall.NoFallLeg:Destroy()
+		
+		godObserveGui:Destroy()
+		leaderboard.Enabled = true
 		
 		for _, v in pairs(playerGui:GetChildren()) do
 			if (v:HasTag("GamingGaming")) then
@@ -732,6 +983,8 @@ connect = game:GetService("RunService").Heartbeat:Connect(function()
 			end
 		end
 		
-		connect:Disconnect()
+		for _, v in pairs(connections) do
+			v:Disconnect()
+		end
 	end
 end)
