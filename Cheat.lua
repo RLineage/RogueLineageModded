@@ -25,11 +25,14 @@ local gui = nil
 
 local exploits = {
 	TrinketEsp = false,
+	NPCEsp = false,
 	PlayerEsp = false,
 	NoFall = false,
-	AutoPickup = false,
+	NoFog = false,
+	Speedhack = false,
+	InfJump = false,
+	--GodObserve = true,
 	Configurations = false,
-	GodObserve = true,
 }
 
 local configurations = {
@@ -133,6 +136,120 @@ local configurations = {
 		LastUpdated = tick(),
 		Table = {},
 	},
+	NPCEsp = {
+		ColorCoding = {
+			Common = {
+				Show = true,
+				Color = Color3.fromRGB(143, 255, 126),
+				Range = 350,
+			},
+			Trainer = {
+				Show = true,
+				Color = Color3.fromRGB(255, 41, 41),
+				Range = 750,
+			},
+			SemiTrainer = {
+				Show = true,
+				Color = Color3.fromRGB(255, 150, 150),
+				Range = 750,
+			},
+			Weapon = {
+				Show = false,
+				Color = Color3.fromRGB(255, 255, 255),
+				Range = 500,
+			},
+			Outfit = {
+				Show = false,
+				Color = Color3.fromRGB(255, 255, 255),
+				Range = 500,
+			},
+			Item = {
+				Show = true,
+				Color = Color3.fromRGB(255, 255, 255),
+				Range = 500,
+			},
+			Merchant = {
+				Show = true,
+				Color = Color3.fromRGB(255, 150, 50),
+				Range = 500,
+			},
+			Doctor = {
+				Show = true,
+				Color = Color3.fromRGB(50, 255, 50),
+				Range = 500,
+			},
+			Specifics = {
+				Tai = {
+					Show = true,
+					Color = Color3.fromRGB(0, 251, 255),
+					Range = 10000,
+				},
+				Tally = {
+					Show = true,
+					Color = Color3.fromRGB(8, 0, 255),
+					Range = 10000,
+				},
+				Fallion = {
+					Show = true,
+					Color = Color3.fromRGB(255, 247, 0),
+					Range = 10000,
+				},
+				Collector = {
+					Show = true,
+					Color = Color3.fromRGB(149, 0, 255),
+					Range = 10000,
+				},
+			},
+		},
+		NPCList = {
+			["Mother of Whisperers"] = "Trainer",
+			["Rorsach"] = "Trainer",
+			["Drake"] = "Trainer",
+			["Gurn"] = "Trainer",
+
+			["Doctor"] = "Doctor",
+			["Therapist"] = "Doctor",
+			["Dorgan"] = "Doctor",
+			["Dorgath"] = "Doctor",
+
+			["Alisone"] = "SemiTrainer",
+			["MonsterOfficerInsight"] = "SemiTrainer",
+
+			["Merchant"] = "Merchant",
+			["Pawnbroker"] = "Merchant",
+			["Banker"] = "Merchant",
+
+			["Caestus"] = "Weapon",
+			["BronzeSword"] = "Weapon",
+			["BronzeDagger"] = "Weapon",
+			["BronzeSpear"] = "Weapon",
+			["SteelSword"] = "Weapon",
+			["SteelDagger"] = "Weapon",
+			["SteelSpear"] = "Weapon",
+			["MythrilSword"] = "Weapon",
+			["MythrilDagger"] = "Weapon",
+			["MythrilSpear"] = "Weapon",
+			["Mythril Rapier"] = "Weapon",
+			["Greatsword"] = "Weapon",
+			["TantoDagger"] = "Weapon",
+			["WakizashiDagger"] = "Weapon",
+			["WitchSilverSword"] = "Weapon",
+			["Katana"] = "Weapon",
+
+			["LordOutfit"] = "Outfit",
+			["BrawlerOutfit"] = "Outfit",
+			["SamuraiOutfit"] = "Outfit",
+			["RogueOutfit"] = "Outfit",
+			["AssassinOutfit"] = "Outfit",
+
+			["Pickaxe"] = "Item",
+			["Frying Pan"] = "Item",
+			["Helmet"] = "Item",
+		},
+		MaxRange = 10000,
+		LastUpdated = tick(),
+		Table = {},	
+	},
 	PlayerEsp = {
 		LastUpdated = tick(),
 		Table = {},	
@@ -141,52 +258,56 @@ local configurations = {
 		CanNoFall = true,
 		NoFallLeg = character:FindFirstChild("Right Leg"):Clone()	
 	},
-	AutoPickup = {
-		CanAutoPickup = true,
-		Percent = 0.9,
+	--[[GodObserve = {
 		LastUpdated = tick()
-	},
-	GodObserve = {
-		UltraClasses = {
-			"sigilknightcommander",
-			"facelessone",
-			"shinobi",
-			"oni",
-			""
-		},
-		Observing = false,
-	}
+	}]]
 }
-
-local fallRemote
-local s, m = pcall(function()
-	fallRemote = character:FindFirstChild("CharacterHandler"):FindFirstChild("Remotes"):FindFirstChild("ApplyFallDamage")
-end)
-if (not s) then
-	warn("No Fall couldn't be initialized!")
-	warn(m)
-	configurations.NoFall.CanNoFall = false
-end
-
-connections.CharacterAdded = player.CharacterAdded:Connect(function(char)
-	character = char
-	root = character:FindFirstChild("HumanoidRootPart")
-	
-	local s, m = pcall(function()
-		fallRemote = character:FindFirstChild("CharacterHandler"):FindFirstChild("Remotes"):FindFirstChild("ApplyFallDamage")
-	end)
-	if (not s) then
-		warn("No Fall couldn't be initialized!")
-		warn(m)
-		configurations.NoFall.CanNoFall = false
-	end
-end)
 
 for _, v in pairs(workspace:GetChildren()) do
 	if (v.Name == "NofallLeg") or (v:HasTag("GamingGaming")) then
 		v:Destroy()
 	end
 end
+
+local function changegui()
+	playerGui.StatGui.Container.CharacterName.Shadow.Text = "LOCKEXPLOITS, THE LEGIT"
+	playerGui.StatGui.Container.CharacterName.Text = "LOCKEXPLOITS, THE LEGIT"
+end
+
+local fallRemote
+
+local function initialize()
+	local s, m = pcall(function()
+		fallRemote = character:WaitForChild("CharacterHandler", 1)
+			:WaitForChild("Remotes", 1):WaitForChild("ApplyFallDamage", 1)
+	end)
+	if (not s) then
+		warn("No Fall couldn't be initialized!")
+		warn(m)
+		configurations.NoFall.CanNoFall = false
+	end
+	
+	changegui()
+	
+	if (connections.LoopWS) then
+		connections.LoopWS:Disconnect()
+	end
+
+	connections.LoopWS = character:FindFirstChildOfClass("Humanoid"):GetPropertyChangedSignal("WalkSpeed"):Connect(function()
+		if (exploits.Speedhack) then
+			character:FindFirstChildOfClass("Humanoid").WalkSpeed = 90
+		end
+	end)
+end
+
+connections.CharacterAdded = player.CharacterAdded:Connect(function(char)
+	character = char
+	root = character:FindFirstChild("HumanoidRootPart")
+
+	initialize()
+end)
+
+initialize()
 
 configurations.NoFall.NoFallLeg.Parent = workspace
 configurations.NoFall.NoFallLeg.Name = "NofallLeg"
@@ -228,7 +349,7 @@ end
 
 local function createButton(name, text, mouse1click, toggle):TextButton
 	if (not list) then error("No List existant.") return end
-	
+
 	local button = Instance.new("TextButton", list)
 	button.Name = name
 	button.Text = text
@@ -243,7 +364,7 @@ local function createButton(name, text, mouse1click, toggle):TextButton
 	button.FontFace = Font.new("rbxasset://fonts/families/Balthazar.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
 	button.TextWrapped = true
 	button.TextColor3 = Color3.fromRGB(47, 43, 30)
-	
+
 	local overlay = Instance.new("ImageLabel", button)
 	overlay.Name = "Overlay"
 	overlay.Position = UDim2.new(0.5, 0, 0.5, 0)
@@ -255,52 +376,54 @@ local function createButton(name, text, mouse1click, toggle):TextButton
 	overlay.SliceCenter = Rect.new(13, 13, 13, 13)
 	overlay.AnchorPoint = Vector2.new(0.5, 0.5)
 	overlay.ZIndex = 1
-	
+
 	if (toggle) then
 		button.Active = false
-		
+
 		button.MouseButton1Click:Connect(function()
 			button.Active = not button.Active
-			
+
 			mouse1click(button.Active)
-			
+
 			button.BackgroundColor3 = (button.Active) and Color3.fromRGB(159, 255, 142) or Color3.fromRGB(215, 203, 191)
 		end)
 	else
 		button.MouseButton1Click:Connect(mouse1click)
 	end
-	
+
 	return button	
 end
+
+local areaMarkers = {}
 
 local function createGui()
 	if (gui ~= nil) then
 		gui:Destroy()
-		
+
 		gui = nil		
 	end
-	
+
 	for _,v in pairs(playerGui:GetChildren()) do
 		if (v:HasTag("GamingGaming")) then
 			v:Destroy()
 		end
 	end
-	
+
 	local screenGui = Instance.new("ScreenGui", playerGui)
 	screenGui.Name = generateUUID().."ScreenGui"
 	screenGui.ResetOnSpawn = false
-	
+
 	screenGui:AddTag("GamingGaming")
-	
+
 	local frame = Instance.new("Frame", screenGui)
 	frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 	frame.BackgroundTransparency = 0.8
-	frame.Position = UDim2.new(0.6, 0, 0.1, 0)
+	frame.Position = UDim2.new(0.3, 0, 0, 0)
 	frame.Size = UDim2.new(0, 250, 0, 250)
 	frame.Name = generateUUID().."Frame"
-	
+
 	local uiDragDetector = Instance.new("UIDragDetector", frame)
-	
+
 	local overlay = Instance.new("ImageLabel", frame)
 	overlay.Name = "Overlay"
 	overlay.Position = UDim2.new(0.5, 0, 0.5, 0)
@@ -312,7 +435,7 @@ local function createGui()
 	overlay.SliceCenter = Rect.new(5, 5, 5, 5)
 	overlay.AnchorPoint = Vector2.new(0.5, 0.5)
 	overlay.ZIndex = 0
-	
+
 	local boundFrame = Instance.new("Frame", overlay)
 	boundFrame.Name = "BoundFrame"
 	boundFrame.Position = UDim2.new(0, 10, 0, 10)
@@ -321,7 +444,7 @@ local function createGui()
 
 	local title = Instance.new("TextLabel", boundFrame)
 	title.Name = "Title"
-	title.Text = "ROGUE CHEAT"
+	title.Text = "LOCK EXPLOITS"
 	title.BackgroundTransparency = 1
 	title.Size = UDim2.new(1, 0, .078,  0)
 	title.TextTransparency = 0
@@ -331,15 +454,15 @@ local function createGui()
 	title.FontFace = Font.new("rbxasset://fonts/families/Balthazar.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
 	title.TextWrapped = false
 	title.TextColor3 = Color3.fromRGB(255, 232, 163)
-	
+
 	local buttonsFrame = Instance.new("Frame", boundFrame)
 	buttonsFrame.Name = "ButtonsFrame"
 	buttonsFrame.Position = UDim2.new(.047,  0, .125, 0)
 	buttonsFrame.Size = UDim2.new(.9, 0, .875, 0)
 	buttonsFrame.BackgroundTransparency = 1
-	
+
 	list = buttonsFrame
-	
+
 	local uiListLayout = Instance.new("UIListLayout", list)
 	uiListLayout.Padding = UDim.new(0.1, 0)
 	uiListLayout.FillDirection = Enum.FillDirection.Horizontal
@@ -348,12 +471,12 @@ local function createGui()
 	uiListLayout.HorizontalAlignment = Enum.HorizontalAlignment.Left
 	uiListLayout.HorizontalFlex = Enum.UIFlexAlignment.SpaceBetween
 	uiListLayout.VerticalAlignment = Enum.VerticalAlignment.Top
-	
+
 	gui = screenGui
-	
+
 	local tEsp = createButton(generateUUID(), "Trinket ESP", function()
 		exploits.TrinketEsp = not exploits.TrinketEsp
-		
+
 		for _, v in pairs(configurations.TrinketEsp.Table) do
 			v.Enabled = exploits.TrinketEsp
 		end
@@ -367,14 +490,72 @@ local function createGui()
 		end
 	end, true)
 
-	local aPickup = createButton(generateUUID(), "Auto Pickup", function()
-		exploits.AutoPickup = not exploits.AutoPickup
+	local npcEsp = createButton(generateUUID(), "NPC Esp", function()
+		exploits.NPCEsp = not exploits.NPCEsp
+
+		for _, v in pairs(configurations.NPCEsp.Table) do
+			v.Enabled = exploits.NPCEsp
+		end
 	end, true)
-	
+
 	local nFall = createButton(generateUUID(), "No Fall", function()
 		exploits.NoFall = not exploits.NoFall
 	end, true)
-	
+
+	local speedhack = createButton(generateUUID(), "Speedhack", function()
+		exploits.Speedhack = not exploits.Speedhack
+	end, true)
+
+	local infjump = createButton(generateUUID(), "Infinite Jump", function()
+		exploits.InfJump = not exploits.InfJump
+	end, true)
+
+	local nFog = createButton(generateUUID(), "No Fog", function()
+		exploits.NoFog = not exploits.NoFog
+
+		if (#areaMarkers == 0) then
+			for _, v in pairs(workspace.AreaMarkers:GetChildren()) do
+				table.insert(areaMarkers, v)
+			end
+		end
+
+		if (exploits.NoFog) then
+			for _, v in pairs(areaMarkers) do
+				v.Parent = nil
+			end
+
+			game.Lighting.FogEnd = 100000000
+			game.Lighting.FogStart = 100000000
+			game.Lighting.FogColor = Color3.fromRGB(255, 255, 255)
+			game.Lighting.Ambient = Color3.fromRGB(255, 255, 255)
+			game.Lighting.ColorShift_Top = Color3.fromRGB(255, 255, 255)
+			game.Lighting.ColorShift_Bottom = Color3.fromRGB(255, 255, 255)
+			game.Lighting.OutdoorAmbient = Color3.fromRGB(255, 255, 255)
+			game.Lighting.ExposureCompensation = -.5
+			game.Lighting.EnvironmentDiffuseScale = 1
+			game.Lighting.GlobalShadows = false
+			game.Lighting.Brightness = 0
+		else
+			for _, v in pairs(areaMarkers) do
+				v.Parent = workspace.AreaMarkers
+			end
+
+			game.Lighting.ExposureCompensation = 0
+			game.Lighting.GlobalShadows = true
+			game.Lighting.Ambient = Color3.fromRGB(70, 70, 70)
+			game.Lighting.ColorShift_Top = Color3.fromRGB(0,0,0)
+			game.Lighting.ColorShift_Bottom = Color3.fromRGB(0,0,0)
+			game.Lighting.OutdoorAmbient = Color3.fromRGB(255, 255, 255)
+			game.Lighting.EnvironmentDiffuseScale = 0
+		end
+	end, true)
+
+	local reset = createButton(generateUUID(), "Knock", function()
+		if (fallRemote) then
+			fallRemote:FireServer(character:FindFirstChildOfClass("Humanoid").MaxHealth * 5)
+		end
+	end)
+
 	--[[local configMenu = createExtraGui()
 	configMenu.Enabled = false
 	
@@ -395,9 +576,15 @@ local function createGui()
 
 	tEsp.LayoutOrder = 1
 	pEsp.LayoutOrder = 2
-	aPickup.LayoutOrder = 3
+	npcEsp.LayoutOrder = 3
 	nFall.LayoutOrder = 4
+	nFog.LayoutOrder = 5
+	speedhack.LayoutOrder = 6
+	infjump.LayoutOrder = 7
+	reset.LayoutOrder = 99
 	--configs.LayoutOrder = 100
+
+	return screenGui
 end
 
 function createExtraGui()
@@ -452,7 +639,7 @@ function createExtraGui()
 	buttonsFrame.Position = UDim2.new(.047,  0, .125, 0)
 	buttonsFrame.Size = UDim2.new(.9, 0, .875, 0)
 	buttonsFrame.BackgroundTransparency = 1
-	
+
 	local uiListLayout = Instance.new("UIListLayout", buttonsFrame)
 	uiListLayout.Padding = UDim.new(0.1, 0)
 	uiListLayout.FillDirection = Enum.FillDirection.Horizontal
@@ -465,15 +652,255 @@ function createExtraGui()
 	--[[createButton(generateUUID(), "Common", function()
 		
 	end, true) -- Trinket <font color="rgb(255,50,50">ESP</font>]]
-	
+
 	return screenGui
 end
 
 local leaderboard = playerGui:FindFirstChild("LeaderboardGui")
 
+local function createName(p1, p2, p3, p4, p5, p6)
+	if not workspace:FindFirstChild("IsPriv") then
+		local v2 = ""
+		if p4 == "Owner" then
+			local v3
+			if p5 == "Female" then
+				v3 = "Lady"
+			else
+				v3 = "Lord"
+			end
+			v2 = v3
+			if p1 == "Ratriel" then
+				v2 = "Pontiff"
+			end
+		end
+		local v4 = {}
+		if v2 ~= "" then
+			table.insert(v4, v2)
+		end
+		if p1 ~= "" and p1 ~= " " then
+			table.insert(v4, p1)
+		end
+		if p3 ~= "" then
+			table.insert(v4, p3)
+		end
+		local v5 = table.concat(v4, " ")
+		local v6 = 0
+		if p6 > 0 then
+			v6 = 3 + string.len(tostring(p6)) * 3
+		end
+		local v7 = v6 > 0 and string.rep(" ", v6) .. v5 or v5
+		if p2 ~= "" then
+			v7 = v7 .. ", " .. p2
+		end
+		return v7
+	else
+		local v4 = {}
+		if p1 ~= "" and p1 ~= " " then
+			return " "..p1
+		end
+	end
+end
+
+local function findPlayer(targetPlayer:Players)
+	local leaderstats = targetPlayer:WaitForChild("leaderstats")
+	local firstname = leaderstats:WaitForChild("FirstName")
+	local ubertitle = leaderstats:WaitForChild("UberTitle")
+	local lastname = leaderstats:WaitForChild("LastName")
+	local houserank = leaderstats:WaitForChild("HouseRank")
+	local gender = leaderstats:WaitForChild("Gender")
+	local prestigeLeaderStats = leaderstats:WaitForChild("Prestige")
+	local maxedict = leaderstats:WaitForChild("MaxEdict")
+	local name = createName(firstname.Value, ubertitle.Value, lastname.Value, houserank.Value, gender.Value, prestigeLeaderStats.Value)
+
+	for _, v in pairs(leaderboard.MainFrame.ScrollingFrame:GetChildren()) do
+		if (v.Text == name) then
+			return v
+		end
+	end
+
+	return nil
+end
+
+--[[
+
+local playerList = {}
+
+local u1 = false
+
+local function refresh()
+	if u1 then
+		return
+	end
+	u1 = true
+
+	local v8 = {}
+	local v10 = game.Players:GetPlayers()
+	for i,v in pairs(v10)do
+		if (v == player) then continue end
+
+		local l__leaderstats__14 = v:FindFirstChild("leaderstats")
+		local v15 = l__leaderstats__14 and l__leaderstats__14:FindFirstChild("FirstName")
+		if l__leaderstats__14 then
+			local l__UberTitle__16 = l__leaderstats__14:FindFirstChild("UberTitle")
+		end
+
+		table.insert(v8, v)
+	end
+	table.sort(v8, function(p7, p8)
+		if not p7 then
+			return true
+		end
+		if not p8 then
+			return false
+		end
+		local l__leaderstats__18 = p7:FindFirstChild("leaderstats")
+		local l__leaderstats__19 = p8:FindFirstChild("leaderstats")
+		local l__Value__20 = l__leaderstats__18.LastName.Value
+		local l__Value__21 = l__leaderstats__19.LastName.Value
+		if l__Value__20 ~= "" and l__Value__21 == "" then
+			return true
+		end
+		if l__Value__20 == "" and l__Value__21 ~= "" then
+			return false
+		end
+		if l__Value__20 < l__Value__21 then
+			return true
+		end
+		if l__Value__21 < l__Value__20 then
+			return false
+		end
+		local l__Value__22 = l__leaderstats__18.FirstName.Value
+		local l__Value__23 = l__leaderstats__19.FirstName.Value
+		if l__Value__22 < l__Value__23 then
+			return true
+		end
+		if l__Value__23 < l__Value__22 then
+			return false
+		end
+
+		return p7.Name < p8.Name
+	end)
+
+	for v24, v25 in pairs(v8) do
+		local v26 = playerList[v25]
+		if (v26) and (typeof(v26) ~= "boolean") then
+			v26.Position = UDim2.new(0, 0, 0, (v24 - 1) * 20)
+			v26.Visible = true
+		end
+	end
+
+	for v27, v28 in pairs(leaderboard.MainFrame.ScrollingFrame:children()) do
+
+	end
+	local v29 = #v8 * 20
+	leaderboard.MainFrame.Size = UDim2.new(0.05, 150, 0, math.min(v29 + 20, 340))
+	leaderboard.MainFrame.ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, v29)
+	u1 = false
+end
+
+local function createPlayerLabel(targetPlayer:Player)
+	if playerList[targetPlayer] then
+		return
+	end
+	if (findPlayer(targetPlayer)) then return end
+
+	playerList[targetPlayer] = true
+	local playerLabel = leaderboard.LeaderboardClient.PlayerLabel:clone()
+	playerList[player] = playerLabel
+	local prestige = playerLabel:WaitForChild("Prestige")
+	local leaderstats = targetPlayer:WaitForChild("leaderstats")
+	local firstname = leaderstats:WaitForChild("FirstName")
+	local ubertitle = leaderstats:WaitForChild("UberTitle")
+	local lastname = leaderstats:WaitForChild("LastName")
+	local houserank = leaderstats:WaitForChild("HouseRank")
+	local gender = leaderstats:WaitForChild("Gender")
+	local prestigeLeaderStats = leaderstats:WaitForChild("Prestige")
+	local maxedict = leaderstats:WaitForChild("MaxEdict")
+	local Requests = game.ReplicatedStorage.Requests
+	Requests.ShowMaxEdict:InvokeServer()
+	local v41 = createName(firstname.Value, ubertitle.Value, lastname.Value, houserank.Value, gender.Value, prestigeLeaderStats.Value)
+	playerLabel.Text = v41
+	if prestigeLeaderStats.Value > 0 then
+		prestige.Text = "#" .. prestigeLeaderStats.Value
+		prestige.Visible = true
+	else
+		prestige.Visible = false
+	end
+	if maxedict.Value then
+		playerLabel.TextColor3 = Color3.fromRGB(255, 214, 81)
+	else
+		playerLabel.TextColor3 = Color3.new(1, 1, 1)
+	end
+	local constructedName = v41
+	ubertitle.Changed:Connect(function()
+		constructedName = createName(firstname.Value, ubertitle.Value, lastname.Value, houserank.Value, gender.Value, prestigeLeaderStats.Value)
+		playerLabel.Text = constructedName
+		refresh()
+	end)
+	firstname.Changed:connect(function()
+		constructedName = createName(firstname.Value, ubertitle.Value, lastname.Value, houserank.Value, gender.Value, prestigeLeaderStats.Value)
+		playerLabel.Text = constructedName
+		refresh()
+	end)
+	lastname.Changed:connect(function()
+		constructedName = createName(firstname.Value, ubertitle.Value, lastname.Value, houserank.Value, gender.Value, prestigeLeaderStats.Value)
+		playerLabel.Text = constructedName
+		refresh()
+	end)
+	houserank.Changed:connect(function()
+		constructedName = createName(firstname.Value, ubertitle.Value, lastname.Value, houserank.Value, gender.Value, prestigeLeaderStats.Value)
+		playerLabel.Text = constructedName
+		refresh()
+	end)
+	gender.Changed:connect(function()
+		refresh()
+	end)
+	prestigeLeaderStats.Changed:connect(function()
+		constructedName = createName(firstname.Value, ubertitle.Value, lastname.Value, houserank.Value, gender.Value, prestigeLeaderStats.Value)
+		if prestigeLeaderStats.Value > 0 then
+			prestige.Text = "#" .. prestigeLeaderStats.Value
+			prestige.Visible = true
+		else
+			prestige.Visible = false
+		end
+		playerLabel.Text = constructedName
+	end)
+	maxedict.Changed:connect(function()
+		if maxedict.Value then
+			playerLabel.TextColor3 = Color3.fromRGB(255, 214, 81)
+			return
+		end
+		playerLabel.TextColor3 = Color3.new(1, 1, 1)
+	end)
+	local u10 = targetPlayer.Name:sub(1, 2) .. "\226\128\142" .. targetPlayer.Name:sub(3)
+	playerLabel.MouseEnter:connect(function()
+		local v42 = 0
+		if prestigeLeaderStats.Value > 0 then
+			v42 = 3 + string.len(tostring(prestigeLeaderStats.Value)) * 3
+		end
+		playerLabel.Text = v42 > 0 and string.rep(" ", v42) .. u10 or u10
+		playerLabel.TextTransparency = 0.3
+	end)
+	playerLabel.MouseLeave:connect(function()
+		playerLabel.Text = constructedName
+		playerLabel.TextTransparency = 0
+	end)
+	pcall(function()
+		playerLabel.Parent = leaderboard.MainFrame.ScrollingFrame
+	end)
+	refresh()
+	return playerLabel
+end
+
+game.Players.PlayerAdded:connect(function(p10)
+	createPlayerLabel(p10)
+end)
+]]
 local function checkIllu(plr)
-	if (plr.Backpack:FindFirstChild("Observe")) then
-		return true
+	if (plr:FindFirstChild("Backpack")) then
+		if (plr.Backpack:FindFirstChild("Observe")) then
+			return true
+		end
 	end
 	if (plr.Character) and (plr.Character:FindFirstChild("Observe")) then
 		return "Equipped"
@@ -481,216 +908,49 @@ local function checkIllu(plr)
 
 	return false
 end
-
-function godObserve()
-	local screenGui = Instance.new("ScreenGui", playerGui)
-	screenGui.Name = "GodObserve"
-	screenGui.ResetOnSpawn = false
-	
-	local mainFrame = Instance.new("ImageLabel", screenGui)
-	mainFrame.Position = UDim2.new(1, 0, 0, 0)
-	mainFrame.Size = UDim2.new(0.05, 150, 0, 200)
-	mainFrame.BackgroundTransparency = 1
-	mainFrame.AnchorPoint = Vector2.new(1, 0)
-	mainFrame.ZIndex = 1
-	mainFrame.Image = "rbxassetid://1327087642"
-	mainFrame.ImageColor3 = Color3.fromRGB(255, 255, 255)
-	mainFrame.ImageTransparency = 0.8
-	mainFrame.ScaleType = Enum.ScaleType.Slice
-	mainFrame.SliceCenter = Rect.new(20, 20, 190, 190)
-	mainFrame.SliceScale = 1
-	
-	local scrollingFrame = Instance.new("ScrollingFrame", mainFrame)
-	scrollingFrame.Position = UDim2.new(0, 15, 0, 10)
-	scrollingFrame.Size = UDim2.new(1, -30, 1, -20)
-	scrollingFrame.BackgroundTransparency = 1
-	scrollingFrame.ClipsDescendants = true
-	scrollingFrame.BottomImage = "rbxassetid://3515608177"
-	scrollingFrame.MidImage = "rbxassetid://3515608813"
-	scrollingFrame.TopImage = "rbxassetid://3515609176"
-	scrollingFrame.ScrollBarImageTransparency = 0
-	scrollingFrame.ScrollBarThickness = 10
-	scrollingFrame.ScrollingDirection = Enum.ScrollingDirection.Y
-	scrollingFrame.VerticalScrollBarInset = Enum.ScrollBarInset.ScrollBar
-	scrollingFrame.VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Right
-	scrollingFrame.ScrollBarImageColor3 = Color3.fromRGB(121, 245, 231)
-	scrollingFrame.CanvasSize = UDim2.new(0, 0, 2, 0)
-	
-	local uiList = Instance.new("UIListLayout", scrollingFrame)
-	
-	local mouseInside = false
-	
-	local function createPlayerLabel(plr:Player)
-		if (plr == player) then return end
-		
-		local playerLabel = Instance.new("TextButton", scrollingFrame)
-		playerLabel.BackgroundTransparency = 1
-		playerLabel.Size = UDim2.new(1, 0, 0, 20)
-		playerLabel.ClipsDescendants = false
-		playerLabel.FontFace = Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.SemiBold, Enum.FontStyle.Normal)
-		playerLabel.Name = plr.UserId
-		playerLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-		playerLabel.TextSize = 18
-		playerLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-		playerLabel.TextStrokeTransparency = 0.5
-		playerLabel.Text = ""
-		playerLabel.TextXAlignment = Enum.TextXAlignment.Left
-		playerLabel.Visible = true
-
-		local prestigeLabel = Instance.new("TextButton", playerLabel)
-		prestigeLabel.BackgroundTransparency = 1
-		prestigeLabel.TextSize = 16
-		prestigeLabel.Size = UDim2.new(0, 35, 0, 20)
-		prestigeLabel.Position = UDim2.new(0,0,0,1)
-		prestigeLabel.ClipsDescendants = false
-		prestigeLabel.FontFace = Font.new("rbxasset://fonts/families/SourceSansPro.json", Enum.FontWeight.SemiBold, Enum.FontStyle.Normal)
-		prestigeLabel.Name = "Prestige"
-		prestigeLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-		prestigeLabel.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
-		prestigeLabel.TextStrokeTransparency = 0.5
-		prestigeLabel.TextTransparency = 0.2
-		prestigeLabel.TextXAlignment = Enum.TextXAlignment.Left
-		prestigeLabel.Text = "#???"
-		prestigeLabel.Visible = false
-		
-		local function renew()
-			playerLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-			
-			local leaderstats = plr:WaitForChild("leaderstats")
-
-			local firstName = leaderstats:WaitForChild("FirstName").Value
-			local lastName = leaderstats:WaitForChild("LastName").Value
-			local houseRank = leaderstats:WaitForChild("HouseRank").Value
-			local gender = leaderstats:WaitForChild("Gender").Value
-			local maxEdict = leaderstats:WaitForChild("MaxEdict").Value
-			local prestige = leaderstats:WaitForChild("Prestige").Value
-			local uberTitle = leaderstats:WaitForChild("UberTitle").Value
-
-			local name = ""
-
-			if (houseRank == "Owner") then
-				if (gender == "Female") then
-					name = "Lady "
-				else
-					name = "Lord "
-				end
-
-				if (firstName == "Ratriel") then
-					lastName = "Pontiff"
-				end
-			end
-
-			name ..= firstName
-			if (lastName ~= "") then
-				name ..= " "..lastName
-			end
-			if (uberTitle ~= "") then
-				name ..= ", "..uberTitle
-			end
-			
-			if (maxEdict) then
-				playerLabel.TextColor3 = Color3.fromRGB(255, 255, 105)
-			end
-			if (prestige ~= 0) then
-				playerLabel.Text = "          "
-				prestigeLabel.Visible = true
-				prestigeLabel.Text = "#"..prestige
-			else
-				prestigeLabel.Visible = false	
-			end
-			local illu = checkIllu(player)
-			if (illu) then
-				if (illu == "Equipped") then
-					playerLabel.TextColor3 = Color3.fromRGB(0, 38, 255)
-				else
-					playerLabel.TextColor3 = Color3.fromRGB(0, 242, 255)
-				end
-			end
-			
-			local outofgame = false
-			
-			if (plr:FindFirstChild("Ingame")) then
-			else
-				outofgame = true
-			end
-			
-			if not outofgame then
-				if (plr:FindFirstChild("ReturnToMenu")) then
-					outofgame = true
-				end
-			end
-			
-			if (outofgame) then
-				playerLabel.TextColor3 = playerLabel.TextColor3:Lerp(Color3.fromRGB(0, 0, 0), .4)
-			end
-			
-			if (mouseInside == true) then
-				playerLabel.TextColor3 = playerLabel.TextColor3:Lerp(Color3.fromRGB(0, 0, 0), .3)
-				name = plr.Name 
-			end
-			
-			playerLabel.Text = name
-		end
-		
-		renew()
-
-		connections[math.random(-99999999999999, 99999999999999)] = plr.ChildAdded:Connect(renew)
-		connections[math.random(-99999999999999, 99999999999999)] = plr.ChildRemoved:Connect(renew)
-
-		connections[math.random(-99999999999999, 99999999999999)] = playerLabel.MouseButton1Click:Connect(function()
-			renew()
-
-			if (not plr.Character) then return end
-				if (not plr:FindFirstChild("Ingame")) then
-				return
-			end
-
-			local humanoid
-			local s, m = pcall(function()
-				humanoid = plr.Character:FindFirstChildOfClass("Humanoid")
-			end)
-
-			if (not s) then return end
-
-			if (configurations.GodObserve.Observing == humanoid) then
-				configurations.GodObserve.Observing = false
-			else
-				configurations.GodObserve.Observing = humanoid
-			end
-		end)
-
-		connections[math.random(-99999999999999, 99999999999999)] = playerLabel.MouseEnter:Connect(function()
-			mouseInside = true
-			renew()
-
-			playerLabel.Text = plr.Name
-		end)
-		
-		connections[math.random(-99999999999999, 99999999999999)] = playerLabel.MouseLeave:Connect(function()
-			mouseInside = false
-			renew()
-		end)
-	end
-
-	connections[math.random(-99999999999999, 99999999999999)] = game.Players.PlayerAdded:Connect(function(v)
-		createPlayerLabel(v)
-	end)
-
-	connections[math.random(-99999999999999, 99999999999999)] = game.Players.PlayerRemoving:Connect(function(v)
-		if (scrollingFrame:FindFirstChild(v.UserId)) then
-			scrollingFrame:FindFirstChild(v.UserId):Destroy()
-		end
-	end)
-
-	for _, v in pairs(game.Players:GetPlayers()) do
-		createPlayerLabel(v)
-	end
-	
-	return screenGui
+--[[
+leaderboard.LeaderboardClient.Enabled = false
+for _, v in pairs(leaderboard.MainFrame.ScrollingFrame:GetChildren()) do
+	v:Destroy()
 end
 
-local godObserveGui = godObserve()
-leaderboard.Enabled = false
+local function refreshGodObserve()
+	for v44, v45 in pairs(game.Players:GetPlayers()) do
+		if (v45 == player) then 
+			local playerLabel = findPlayer(v45)
+			if (playerLabel) then
+				playerLabel.Visible = false
+			end
+
+			continue 
+		end
+		spawn(function()
+			createPlayerLabel(v45)
+
+			local playerLabel = findPlayer(v45)
+			if (playerLabel) then
+				local illu = checkIllu(v45)
+				if (illu) then
+					if (illu == "Equipped") then
+						playerLabel.TextColor3 = Color3.fromRGB(0, 55, 255)
+					else
+						playerLabel.TextColor3 = Color3.fromRGB(0, 213, 255)
+					end
+				else
+					if (v45:FindFirstChild("leaderstats")) and (v45:FindFirstChild("leaderstats"):FindFirstChild("MaxEdict")) and (v45:FindFirstChild("leaderstats"):FindFirstChild("MaxEdict").Value) then
+						playerLabel.TextColor3 = Color3.fromRGB(255, 214, 81)
+					else
+						playerLabel.TextColor3 = Color3.new(1, 1, 1)
+					end
+				end
+
+				if (not v45:FindFirstChild("Ingame")) then
+					playerLabel.TextColor3 = playerLabel.TextColor3:lerp(Color3.fromRGB(0, 0, 0), .5)
+				end
+			end
+		end)
+	end
+end]]
 
 function playerEsp()
 	local player = game.Players.LocalPlayer
@@ -701,20 +961,20 @@ function playerEsp()
 		playerEspFolder:AddTag("GamingGaming")
 		playerEspFolder.Name = "PlayerEsp"
 	end
-	
+
 	for i, v in pairs(configurations.PlayerEsp.Table) do
 		v:Destroy()
-		
+
 		configurations.PlayerEsp.Table[i] = nil
 	end
 
 	for _,v in pairs(game.Players:GetChildren()) do
 		if (player == v) and (game.PlaceId ~= 18459294953) then continue end
-		
+
 		local char = v.Character or v.CharacterAdded:Wait()
 		if (not char) then continue end
 		if (not char:FindFirstChild("HumanoidRootPart")) then continue end
-		
+
 		local billboard = Instance.new("BillboardGui", playerEspFolder)
 		billboard.Adornee = char.HumanoidRootPart
 		billboard.AlwaysOnTop = true
@@ -733,7 +993,7 @@ function playerEsp()
 		if checkIllu(v) then
 			text.TextColor3 = Color3.fromRGB(30, 206, 255)
 		end
-		
+
 		table.insert(configurations.PlayerEsp.Table, billboard)
 	end
 end
@@ -754,13 +1014,13 @@ function esp()
 
 	for i, v in pairs(configurations.TrinketEsp.Table) do
 		v:Destroy()
-		
+
 		configurations.TrinketEsp.Table[i] = nil
 	end
 
 	for _,v in pairs(trinkets:GetChildren()) do
 		if (not v:FindFirstChild("ClickPart")) then continue end
-		
+
 		local trinketType = "" -- Common, Rare, Gem, Event, SemiArtifact, Artifact, Unknown
 		local trinketName = ""
 
@@ -814,7 +1074,7 @@ function esp()
 			if (v:FindFirstChildOfClass("SpecialMesh")) then
 				if (v:FindFirstChildOfClass("SpecialMesh").MeshId == "rbxassetid://%202877143560%20") then
 					trinketName = "Gem"
-					
+
 					if (v.Color == Color3.fromRGB(255, 0, 191)) then
 						trinketName = "Rift Gem"
 					elseif (v.Color == Color3.fromRGB(0, 184, 49)) then
@@ -852,11 +1112,11 @@ function esp()
 					end
 				end
 			end
-			
+
 			if (v:FindFirstChild("Horn1") or v:FindFirstChild("Horn2")) then
 				trinketName = "Azael Horns"
 			end
-			
+
 			if (v:FindFirstChildOfClass("ParticleEmitter")) then
 				if (v:FindFirstChildOfClass("ParticleEmitter").Texture == "rbxassetid://20443483") then
 					if (v:FindFirstChildOfClass("PointLight")) then
@@ -875,13 +1135,13 @@ function esp()
 		if (trinketName == "") then
 			trinketName = "Unknown"
 		end
-		
+
 		trinketType = configurations.TrinketEsp.TrinketList[trinketName]
 		local trinketTier = configurations.TrinketEsp.ColorCoding[trinketType]
 		if (configurations.TrinketEsp.ColorCoding.Specifics[trinketName]) then
 			trinketTier = configurations.TrinketEsp.ColorCoding.Specifics[trinketName]
 		end
-		
+
 		if (not trinketTier) then continue end
 		if (not trinketTier.Show) then
 			continue
@@ -896,7 +1156,7 @@ function esp()
 		billboard.MaxDistance = trinketTier.Range
 		billboard.Enabled = exploits.TrinketEsp
 		billboard.Size = UDim2.new(0, 75, 0, 75)
-		
+
 		local text = Instance.new("TextLabel", billboard)
 		text.Text = trinketName
 		text.Font = Enum.Font.Antique
@@ -911,25 +1171,158 @@ function esp()
 		text.FontFace = Font.new("rbxasset://fonts/families/Balthazar.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
 		text.TextWrapped = true
 		text.TextSize = 16
-		
+
 		table.insert(configurations.TrinketEsp.Table, billboard)
 	end
 end
 
-createGui()
+function npcEsp()
+	local player = game.Players.LocalPlayer
+	local char = player.Character or player.CharacterAdded:Wait()
+	local root = char:WaitForChild("HumanoidRootPart")
+
+	local espNPC = playerGui:FindFirstChild("EspNPCs")
+	if (not espNPC) then
+		espNPC = Instance.new("Folder", playerGui)
+		espNPC:AddTag("GamingGaming")
+		espNPC.Name = "EspNPCs"
+	end
+
+	local npcs = workspace.NPCs
+
+	for i, v in pairs(configurations.NPCEsp.Table) do
+		v:Destroy()
+
+		configurations.NPCEsp.Table[i] = nil
+	end
+
+	for _,v in pairs(npcs:GetChildren()) do
+		if (not v:FindFirstChild("HumanoidRootPart")) then continue end
+
+		local npcType = "Common" -- Common, Rare, Gem, Event, SemiArtifact, Artifact, Unknown
+		local npcName = v.Name
+
+		npcType = configurations.NPCEsp.NPCList[npcName] or "Common"
+		if (npcType == "Common") then
+			if (npcName:find("Outfit")) then
+				npcType = "Outfit"
+			end
+		end
+		local npcTier = configurations.NPCEsp.ColorCoding[npcType]
+		if (configurations.NPCEsp.ColorCoding.Specifics[npcName]) then
+			npcTier = configurations.NPCEsp.ColorCoding.Specifics[npcName]
+		end
+
+		if (not npcTier) then continue end
+		if (not npcTier.Show) then
+			continue
+		end
+
+		local distance = (root.Position - v.HumanoidRootPart.Position).Magnitude
+		if (distance >= npcTier.Range) or (distance >= configurations.NPCEsp.MaxRange) then continue end
+
+		local billboard = Instance.new("BillboardGui", espNPC)
+		billboard.Adornee = v.HumanoidRootPart
+		billboard.AlwaysOnTop = true
+		billboard.MaxDistance = npcTier.Range
+		billboard.Enabled = exploits.NPCEsp
+		billboard.Size = UDim2.new(0, 75, 0, 75)
+
+		local text = Instance.new("TextLabel", billboard)
+		text.Text = (npcName == "Tai") and "Snowball Tal" or npcName
+		text.Font = Enum.Font.Antique
+		text.Size = UDim2.new(1,0,1,0)
+		text.Position = UDim2.new(0,0,0,0)
+		text.BackgroundTransparency = 1
+		text.TextColor3 = npcTier.Color
+		text.TextTransparency = 0
+		text.TextStrokeTransparency = 0
+		text.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+		text.RichText = true
+		text.FontFace = Font.new("rbxasset://fonts/families/Balthazar.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+		text.TextWrapped = true
+		text.TextSize = 16
+
+		table.insert(configurations.NPCEsp.Table, billboard)
+	end
+end
+
+local cheatGUI = createGui()
 esp()
+npcEsp()
 
 playerGui:RemoveTag("GamingGaming")
 
-connections.RenderStepped = game:GetService("RunService").RenderStepped:Connect(function()
-	leaderboard.Enabled = not godObserveGui.Enabled
+game.UserInputService.InputBegan:Connect(function(input:InputObject, gpe)
+	if (gpe) then
+		return
+	end
 
-	if (configurations.GodObserve.Observing == false) then
-		workspace.CurrentCamera.CameraSubject = character:FindFirstChildOfClass("Humanoid")
-	else
-		workspace.CurrentCamera.CameraSubject = configurations.GodObserve.Observing	
+	if (input.KeyCode == Enum.KeyCode.M) then
+		cheatGUI.Enabled = not cheatGUI.Enabled
 	end
 end)
+
+game.UserInputService.JumpRequest:Connect(function()
+	if (exploits.InfJump) then
+		character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
+	end
+end)
+
+if (player) and (player:FindFirstChild("leaderstats")) then
+	if (player:FindFirstChild("leaderstats"):FindFirstChild("FirstName")) then
+		connections.FirstName = player.leaderstats.FirstName:GetPropertyChangedSignal("Value"):Connect(function()
+			player.leaderstats.FirstName.Value = "LockExploits"
+			changegui()
+		end)
+		player.leaderstats.FirstName.Value = "LockExploits"
+	end
+end
+if (player) and (player:FindFirstChild("leaderstats")) then
+	if (player:FindFirstChild("leaderstats"):FindFirstChild("LastName")) then
+		connections.LastName = player.leaderstats.LastName:GetPropertyChangedSignal("Value"):Connect(function()
+			player.leaderstats.LastName.Value = ""
+			changegui()
+		end)
+		player.leaderstats.LastName.Value = ""
+	end
+end
+if (player) and (player:FindFirstChild("leaderstats")) then
+	if (player:FindFirstChild("leaderstats"):FindFirstChild("HouseRank")) then
+		connections.HouseRank = player.leaderstats.HouseRank:GetPropertyChangedSignal("Value"):Connect(function()
+			player.leaderstats.HouseRank.Value = ""
+			changegui()
+		end)
+		player.leaderstats.HouseRank.Value = ""
+	end
+end
+if (player) and (player:FindFirstChild("leaderstats")) then
+	if (player:FindFirstChild("leaderstats"):FindFirstChild("UberTitle")) then
+		connections.UberTitle = player.leaderstats.UberTitle:GetPropertyChangedSignal("Value"):Connect(function()
+			player.leaderstats.UberTitle.Value = "The Legit"
+			changegui()
+		end)
+		player.leaderstats.UberTitle.Value = "The Legit"
+	end
+end
+if (player) and (player:FindFirstChild("leaderstats")) then
+	if (player:FindFirstChild("leaderstats"):FindFirstChild("Prestige")) then
+		connections.Prestige = player.leaderstats.Prestige:GetPropertyChangedSignal("Value"):Connect(function()
+			player.leaderstats.Prestige.Value = 1
+			changegui()
+		end)
+		player.leaderstats.Prestige.Value = 1
+	end
+end
+if (player) and (player:FindFirstChild("leaderstats")) then
+	if (player:FindFirstChild("leaderstats"):FindFirstChild("MaxEdict")) then
+		connections.MaxEdict = player.leaderstats.MaxEdict:GetPropertyChangedSignal("Value"):Connect(function()
+			player.leaderstats.MaxEdict.Value = true
+			changegui()
+		end)
+		player.leaderstats.MaxEdict.Value = true
+	end
+end
 
 connections.Heartbeat = game:GetService("RunService").Heartbeat:Connect(function()
 	if (exploits.PlayerEsp) then
@@ -939,7 +1332,7 @@ connections.Heartbeat = game:GetService("RunService").Heartbeat:Connect(function
 			configurations.PlayerEsp.LastUpdated = tick()
 		end
 	end
-	
+
 	if (exploits.TrinketEsp) then
 		if (tick() - configurations.TrinketEsp.LastUpdated) > 3 then
 			esp()
@@ -947,39 +1340,32 @@ connections.Heartbeat = game:GetService("RunService").Heartbeat:Connect(function
 			configurations.TrinketEsp.LastUpdated = tick()
 		end
 	end
-	
-	if (exploits.AutoPickup) and (configurations.AutoPickup.CanAutoPickup) then
-		if (tick() - configurations.AutoPickup.LastUpdated) > 0.7 then
-			configurations.AutoPickup.LastUpdated = tick()
 
-			for _, v in pairs(workspace.Trinkets:GetChildren()) do
-				if (v:FindFirstChild("ClickPart")) then
-					if (v.ClickPart:FindFirstChildOfClass("ClickDetector")) then
-						if (root.Position - v.Position).Magnitude <= v.ClickPart:FindFirstChildOfClass("ClickDetector").MaxActivationDistance * configurations.AutoPickup.Percent then
-							if fireclickdetector then
-								fireclickdetector(v.ClickPart:FindFirstChildOfClass("ClickDetector"))
-							else
-								warn("Your exploit doesn't have needed dependencies.")
-								warn("Missing: 'fireclickdetector'.")
+	if (exploits.NPCEsp) then
+		if (tick() - configurations.NPCEsp.LastUpdated) > 3 then
+			npcEsp()
 
-								configurations.AutoPickup.CanAutoPickup = false
-
-								break
-							end
-						end
-					end
-				end
-			end
+			configurations.NPCEsp.LastUpdated = tick()
 		end
 	end
 
-	configurations.NoFall.NoFallLeg.CanCollide = exploits.NoFall
-	
-	--[[if (exploits.NoFall) and (configurations.NoFall.CanNoFall) then
-		fallRemote:FireServer(-0.1)
+	changegui()
+		
+--[[
+	if (exploits.GodObserve) and (tick() - configurations.GodObserve.LastUpdated) > 1 then
+		refreshGodObserve()
+
+		configurations.GodObserve.LastUpdate = tick()
 	end]]
 
-	leaderboard.Enabled = not godObserveGui.Enabled
+	--[[local playerlabel = findPlayer(player)
+	if (playerlabel) then
+		playerlabel.Visible = false
+	end]]
+
+	if (exploits.NoFall) and (configurations.NoFall.CanNoFall) then
+		fallRemote:FireServer(0.1)
+	end
 
 	if (playerGui:HasTag("GamingGaming")) then
 		for _, v in pairs(configurations.PlayerEsp.Table) do
@@ -988,24 +1374,42 @@ connections.Heartbeat = game:GetService("RunService").Heartbeat:Connect(function
 		for _, v in pairs(configurations.TrinketEsp.Table) do
 			v:Destroy()
 		end
+		for _, v in pairs(configurations.NPCEsp.Table) do
+			v:Destroy()
+		end
 
 		exploits.AutoPickup = false
 		exploits.TrinketEsp = false
 		exploits.PlayerEsp = false
+		exploits.NPCEsp = false
+		exploits.InfJump = false
+		exploits.Speedhack = false
+		exploits.NoFog = false
+		--exploits.GodObserve = false
 		exploits.NoFall = false
-		exploits.GodObserve = false
-		
+
 		configurations.NoFall.NoFallLeg:Destroy()
-		
-		godObserveGui:Destroy()
-		leaderboard.Enabled = true
-		
+
+		--leaderboard.LeaderboardClient.Enabled = true
+
+		for _, v in pairs(areaMarkers) do
+			v.Parent = workspace.AreaMarkers
+		end
+
+		game.Lighting.ExposureCompensation = 0
+		game.Lighting.GlobalShadows = true
+		game.Lighting.Ambient = Color3.fromRGB(70, 70, 70)
+		game.Lighting.ColorShift_Top = Color3.fromRGB(0,0,0)
+		game.Lighting.ColorShift_Bottom = Color3.fromRGB(0,0,0)
+		game.Lighting.OutdoorAmbient = Color3.fromRGB(255, 255, 255)
+		game.Lighting.EnvironmentDiffuseScale = 0
+
 		for _, v in pairs(playerGui:GetChildren()) do
 			if (v:HasTag("GamingGaming")) then
 				v:Destroy()
 			end
 		end
-		
+
 		for _, v in pairs(connections) do
 			v:Disconnect()
 		end
